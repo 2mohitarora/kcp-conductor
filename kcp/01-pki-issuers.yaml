@@ -1,0 +1,38 @@
+# Self-signed bootstrap issuer (creates the root CA)
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kcp-pki-bootstrap
+  namespace: kcp
+spec:
+  selfSigned: {}
+---
+# Root CA certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-pki-ca
+  namespace: kcp
+spec:
+  isCA: true
+  commonName: kcp-pki-ca
+  secretName: kcp-pki-ca
+  duration: 87600h # 10 years
+  renewBefore: 360h # 15 days
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    name: kcp-pki-bootstrap
+    kind: Issuer
+    group: cert-manager.io
+---
+# Intermediate issuer (signs all other CAs)
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kcp-pki
+  namespace: kcp
+spec:
+  ca:
+    secretName: kcp-pki-ca

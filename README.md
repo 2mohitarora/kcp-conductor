@@ -28,6 +28,8 @@ docker context list
 vcluster create cluster-1 --driver docker --values cluster-1.yaml
 
 helm repo add cilium https://helm.cilium.io/
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
 
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/experimental-install.yaml
 
@@ -57,8 +59,8 @@ kubectl get svc -l io.cilium.gateway/owning-gateway=default-gateway -n cilium
 # See the Cilium Envoy proxy pod
 kubectl -n kube-system logs -l app.kubernetes.io/name=cilium-envoy -f -n cilium
 
-# Create a route for front end service
-kubectl apply -f ./conductor/route.yaml
+# Create a route for conductor ui service
+kubectl apply -f ./conductor/conductor-ui-route.yaml
 ```
 # Configure Registry for first cluster
 ```
@@ -93,12 +95,22 @@ curl -s http://localhost:9200/_cluster/health | python3 -m json.tool
 # Install conductor server
 kubectl apply -f ./conductor/03-conductor-server.yaml
 
-# Create conductor UI route
-kubectl apply -f ./conductor/conductor-ui-route.yaml
-
 # Get Gatway External IP
 kubectl get svc cilium-gateway-default-gateway -n cilium
 
 # Hit the URL in browser: http://<GATEWAY-EXTERNAL-IP>
 
 ```
+# Install cert-manager, various components need it
+```
+# Install cert-manager
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --set crds.enabled=true
+
+# After cert-manager, wait for pods to become Ready:
+kubectl get pods --all-namespaces -w -o wide
+```
+
+# Move to kcp etcd creation
