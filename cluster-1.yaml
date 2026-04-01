@@ -1,0 +1,25 @@
+experimental:
+  docker:
+    network: "vind-cluster-1"
+    nodes:
+      - name: worker-1
+    loadBalancer:
+      enabled: true
+    registryProxy:
+      enabled: false
+# CNI Configuration
+# vCluster only supports Flannel natively. To use other CNI plugins (Calico, Cilium, etc.):
+# 1. Disable Flannel (set enabled: false)
+# 2. Create the cluster
+# 3. Manually install your preferred CNI plugin IMMEDIATELY after cluster creation
+#    (pods will be stuck in Pending state until CNI is installed)
+deploy:
+  cni:
+    flannel:
+      enabled: false # Disable default Flannel CNI
+# Kubernetes version (optional, defaults to v1.34.0)
+# Specify via: controlPlane.distro.k8s.version
+controlPlane:
+  distro:
+    k8s:
+      version: "v1.34.0" # or use image.tag for custom images

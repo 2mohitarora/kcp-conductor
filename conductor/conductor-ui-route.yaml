@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: conductor-ui-route
+  namespace: conductor
+spec:
+  parentRefs:
+    - name: default-gateway
+      namespace: cilium
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: conductor-server
+          port: 5000

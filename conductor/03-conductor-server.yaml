@@ -1,0 +1,164 @@
+---
+# Conductor configuration - Redis + ES7 backend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conductor-config
+  namespace: conductor
+data:
+  config.properties: |
+    # ============================================
+    # Database + Queue: Redis standalone
+    # ============================================
+    conductor.db.type=redis_standalone
+    conductor.queue.type=redis_standalone
+
+    # Redis connection (points to the redis Service)
+    conductor.redis.hosts=redis:6379:us-default
+    conductor.redis.workflowNamespacePrefix=conductor
+    conductor.redis.queueNamespacePrefix=conductor_queues
+
+    # ============================================
+    # Indexing: Elasticsearch 7
+    # ============================================
+    conductor.indexing.enabled=true
+    conductor.indexing.type=elasticsearch
+    conductor.elasticsearch.url=http://elasticsearch:9200
+    conductor.elasticsearch.version=7
+    conductor.elasticsearch.indexName=conductor
+    conductor.elasticsearch.clusterHealthColor=yellow
+    conductor.app.asyncIndexingEnabled=true
+
+    # ============================================
+    # Locking (Redis-based distributed locking)
+    # ============================================
+    conductor.workflow-execution-lock.type=redis
+    conductor.app.workflowExecutionLockEnabled=true
+    conductor.redis-lock.serverAddress=redis://redis:6379
+
+    # ============================================
+    # Sweeper + system workers
+    # ============================================
+    conductor.app.sweeperThreadCount=4
+    conductor.app.systemTaskWorkerThreadCount=8
+    conductor.app.systemTaskMaxPollCount=8
+
+    # ============================================
+    # Metrics (Prometheus)
+    # ============================================
+    conductor.metrics-prometheus.enabled=true
+    management.endpoints.web.exposure.include=health,info,prometheus
+
+    # ============================================
+    # UI
+    # ============================================
+    conductor.ui.enabled=true
+
+    # Load sample kitchen sink workflow
+    loadSample=true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conductor-server
+  namespace: conductor
+  labels:
+    app: conductor-server
+    app.kubernetes.io/part-of: conductor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conductor-server
+  template:
+    metadata:
+      labels:
+        app: conductor-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      initContainers:
+        # Wait for Redis to be ready
+        - name: wait-for-redis
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Redis..."
+              until nc -z redis 6379; do sleep 2; done
+              echo "Redis is up"
+        # Wait for Elasticsearch to be ready
+        - name: wait-for-es
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Elasticsearch..."
+              until nc -z elasticsearch 9200; do sleep 2; done
+              echo "Elasticsearch is up"
+      containers:
+        - name: conductor-server
+          image: conductoross/conductor:latest
+          ports:
+            - containerPort: 8080
+              name: api
+            - containerPort: 5000
+              name: ui
+          env:
+            - name: CONDUCTOR_CONFIG_FILE
+              value: /app/config/config.properties
+            - name: JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+          volumeMounts:
+            - name: conductor-config
+              mountPath: /app/config
+          resources:
+            requests:
+              cpu: 250m
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 5
+      volumes:
+        - name: conductor-config
+          configMap:
+            name: conductor-config
+---
+# ClusterIP only — not exposed externally.
+# Your custom controller will talk to this service internally.
+apiVersion: v1
+kind: Service
+metadata:
+  name: conductor-server
+  namespace: conductor
+  labels:
+    app: conductor-server
+spec:
+  type: ClusterIP
+  selector:
+    app: conductor-server
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+    - port: 5000
+      targetPort: 5000
+      name: ui
