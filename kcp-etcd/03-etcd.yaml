@@ -121,28 +121,26 @@ spec:
           livenessProbe:
             exec:
               command:
-                - /bin/sh
-                - -c
-                - |
-                  etcdctl endpoint health \
-                    --endpoints=https://localhost:2379 \
-                    --cacert=/etc/etcd/tls/ca/ca.crt \
-                    --cert=/etc/etcd/tls/server/tls.crt \
-                    --key=/etc/etcd/tls/server/tls.key
+                - etcdctl
+                - endpoint
+                - health
+                - --endpoints=https://localhost:2379
+                - --cacert=/etc/etcd/tls/ca/ca.crt
+                - --cert=/etc/etcd/tls/server/tls.crt
+                - --key=/etc/etcd/tls/server/tls.key
             initialDelaySeconds: 30
             periodSeconds: 15
             timeoutSeconds: 10
           readinessProbe:
             exec:
               command:
-                - /bin/sh
-                - -c
-                - |
-                  etcdctl endpoint health \
-                    --endpoints=https://localhost:2379 \
-                    --cacert=/etc/etcd/tls/ca/ca.crt \
-                    --cert=/etc/etcd/tls/server/tls.crt \
-                    --key=/etc/etcd/tls/server/tls.key
+                - etcdctl
+                - endpoint
+                - health
+                - --endpoints=https://localhost:2379
+                - --cacert=/etc/etcd/tls/ca/ca.crt
+                - --cert=/etc/etcd/tls/server/tls.crt
+                - --key=/etc/etcd/tls/server/tls.key
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
