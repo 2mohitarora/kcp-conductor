@@ -81,7 +81,13 @@ The new shard starts its virtual workspace server (usually in-process). Its virt
 - Front-proxy learns the new path → shard mapping: The front-proxy watches Shard objects in the root logical cluster. When the new LogicalCluster is created on shard alpha, the workspace controller on the root shard updates the Workspace object to point to that logical cluster. The front-proxy sees the Workspace object change and updates its internal routing: requests for /clusters/root:team-a now go to https://alpha.example.com:6443. Any future kubectl request to /clusters/root:team-a:staging gets proxied to shard alpha's baseURL.
 - User can now work in the new workspace — routed transparently to shard alpha: The user runs kcp workspace use staging and starts creating resources. Every request goes: user → front-proxy → shard alpha. The user has no idea their workspace is on shard alpha — they just see root:team-a:staging. The indirection is completely transparent.
 
+### Why Virtual workapce URL?
 
+- Security isolation. Controllers should not be able to directly access customer kcp workspaces — they should only be able to access the objects connected to their provided APIs. If your Widget controller had a regular kubeconfig to each tenant's workspace, it could see their Secrets, ConfigMaps, RBAC — everything. The VW endpoint is a filtered projection that only exposes Widget resources tied to your APIExport. The tenants' other data is invisible.
+
+- Multi-workspace aggregation. A regular kubeconfig points to one workspace. But your APIExport might be consumed by 500 workspaces across 3 shards. You'd need 500 separate informers. Because multiple workspaces coexist in kcp, we can be much more efficient and have one controller handle objects in multiple workspaces. The VW URL gives you a single endpoint per shard that aggregates all bound resources across every workspace on that shard.
+
+- Shard-aware scaling. As soon as sharding is added, the list of URLs becomes a list. So it might be that 1,000 tenants are accessible under one URL, the next 1,000 under another. The controllers have to watch the URL lists in status of objects and start new instances. Your controller watches the APIExportEndpointSlice — it gets one VW URL per shard. For 3 shards, that's 3 informer connections instead of potentially thousands.
 
 
 
