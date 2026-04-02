@@ -61,7 +61,6 @@ spec:
 # ─── Client cert for kcp to authenticate to etcd ────────────────
 #
 # This cert will need to be copied to the kcp namespace.
-# See 04-copy-client-cert.yaml for the Job that does this.
 #
 apiVersion: cert-manager.io/v1
 kind: Certificate

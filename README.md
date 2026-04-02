@@ -68,6 +68,7 @@ kubectl apply -f ./conductor/conductor-ui-route.yaml
 docker run -d --name registry-1 --network vind-cluster-1 -p 5050:5000 registry:2
 
 # Configure registry for cluster-1 so that nodes can pull from insecure registry
+chmod +x ./cluster-1-script.sh
 ./cluster-1-script.sh
 ```
 
