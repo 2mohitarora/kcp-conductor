@@ -134,5 +134,5 @@ kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
 # Should show: root:my-first-workspace
 
 # Go back to root
-kubectl ws root --kubeconfig=kcp-external-admin.kubeconfig
+kubectl ws :root --kubeconfig=kcp-external-admin.kubeconfig
 ```
