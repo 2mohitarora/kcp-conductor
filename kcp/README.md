@@ -124,15 +124,15 @@ kubectl kcp --version
 ### Test workspace operations
 ```
 # Check current workspace
-kubectl ws . --insecure-skip-tls-verify
+kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
 
 # Create a workspace
-kubectl create-workspace my-first-workspace --enter --insecure-skip-tls-verify
+kubectl create-workspace my-first-workspace --enter --kubeconfig=kcp-external-admin.kubeconfig
 
 # Verify you're in it
-kubectl ws . --insecure-skip-tls-verify
+kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
 # Should show: root:my-first-workspace
 
 # Go back to root
-kubectl ws root --insecure-skip-tls-verify
+kubectl ws root --kubeconfig=kcp-external-admin.kubeconfig
 ```
