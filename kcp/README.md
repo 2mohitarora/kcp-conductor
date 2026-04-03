@@ -6,10 +6,9 @@ kubectl apply -f 00-namespace.yaml
 # Find the etcd CA secret
 kubectl get secrets -n etcd | grep ca
 
-
-kubectl get secret etcd-ca -n etcd -o yaml \
-  | sed 's/namespace: etcd/namespace: kcp/' \
-  | kubectl apply -f -
+kubectl get secret etcd-ca -n cert-manager -o yaml | \
+  sed '/namespace:/d' | \
+  kubectl apply -n kcp -f -
 
 # Verify
 kubectl get secret etcd-ca -n kcp
