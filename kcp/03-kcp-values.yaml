@@ -1,4 +1,5 @@
 externalHostname: "kcp.example.com"
+externalPort: "443"
 etcd:
   enabled: false
 kcp:
@@ -11,6 +12,7 @@ kcpFrontProxy:
   replicas: 1
   service:
     type: ClusterIP
+    port: 443
 certificates:
   privateKeys:
     algorithm: RSA
