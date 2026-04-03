@@ -80,7 +80,7 @@ kubectl get gateway default-gateway -n cilium
 ### Verify kcp is reachable
 ```
 # Test with curl (use -k for self-signed certs)
-curl -k https://kcp.example.com/readyz
+curl -k --resolve kcp.example.com:443:192.168.97.254 https://kcp.example.com/readyz
 # Expected: "ok"
 
 # Test with kubectl
