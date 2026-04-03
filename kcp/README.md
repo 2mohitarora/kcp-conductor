@@ -100,12 +100,17 @@ kubectl get svc -n cilium
 echo "192.168.97.254 kcp.example.com" | sudo tee -a /etc/hosts
 
 
-# Extract client cert and key
+# Extract external client cert and key
 kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/kcp-client.crt
 kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.key}' | base64 -d > /tmp/kcp-client.key
 
 # Test with kubectl
 kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
+
+# Extract internal client cert and key
+kubectl get secret kcp-internal-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/kcp-internal-client.crt
+kubectl get secret kcp-internal-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.key}' | base64 -d > /tmp/kcp-internal-client.key
+
 ``` 
 
 ### Install kcp kubectl plugin
@@ -127,7 +132,7 @@ kubectl kcp --version
 kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
 
 # Create a workspace
-kubectl create-workspace my-first-workspace --enter --kubeconfig=kcp-external-admin.kubeconfig
+kubectl create-workspace my-first-workspace --enter --kubeconfig=kcp-admin.kubeconfig
 
 # Verify you're in it
 kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
