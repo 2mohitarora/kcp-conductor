@@ -117,25 +117,29 @@ kubectl get workspaces --insecure-skip-tls-verify
 
 ### Install kcp kubectl plugin
 ```
-# Install the workspace plugin
-kubectl krew install kcp
+kubectl krew index add kcp-dev https://github.com/kcp-dev/krew-index.git
+kubectl krew update
 
-# Or download directly from GitHub releases:
-# https://github.com/kcp-dev/kcp/releases
+kubectl krew install kcp-dev/kcp
+kubectl krew install kcp-dev/ws
+kubectl krew install kcp-dev/create-workspace
+
+# Verify
+kubectl kcp --version
 ```
 
 ### Test workspace operations
 ```
 # Check current workspace
-kubectl ws .
+kubectl ws . --insecure-skip-tls-verify
 
 # Create a workspace
-kubectl ws create my-first-workspace --enter
+kubectl create-workspace my-first-workspace --enter --insecure-skip-tls-verify
 
 # Verify you're in it
-kubectl ws .
+kubectl ws . --insecure-skip-tls-verify
 # Should show: root:my-first-workspace
 
 # Go back to root
-kubectl ws root
+kubectl ws root --insecure-skip-tls-verify
 ```
