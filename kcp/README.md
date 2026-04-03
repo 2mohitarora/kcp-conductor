@@ -110,6 +110,9 @@ kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data
 
 # Use it
 KUBECONFIG=kcp-external-admin.kubeconfig kubectl api-resources --insecure-skip-tls-verify
+export KUBECONFIG=kcp-external-admin.kubeconfig
+# List workspaces
+kubectl get workspaces --insecure-skip-tls-verify
 ``` 
 
 ### Install kcp kubectl plugin
@@ -123,13 +126,8 @@ kubectl krew install kcp
 
 ### Test workspace operations
 ```
-export KUBECONFIG=kcp-admin.kubeconfig
-
 # Check current workspace
 kubectl ws .
-
-# List workspaces
-kubectl get workspaces
 
 # Create a workspace
 kubectl ws create my-first-workspace --enter
