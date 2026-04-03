@@ -58,9 +58,6 @@ kubectl get gateways -n cilium
 kubectl get svc -l io.cilium.gateway/owning-gateway=default-gateway -n cilium
 # See the Cilium Envoy proxy pod
 kubectl -n kube-system logs -l app.kubernetes.io/name=cilium-envoy -f -n cilium
-
-# Create a route for conductor ui service
-kubectl apply -f ./conductor/conductor-ui-route.yaml
 ```
 # Configure Registry for first cluster
 ```
@@ -95,6 +92,9 @@ curl -s http://localhost:9200/_cluster/health | python3 -m json.tool
 
 # Install conductor server
 kubectl apply -f ./conductor/03-conductor-server.yaml
+
+# Create a route for conductor ui service
+kubectl apply -f ./conductor/conductor-ui-route.yaml
 
 # Get Gatway External IP
 kubectl get svc cilium-gateway-default-gateway -n cilium
