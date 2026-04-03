@@ -125,16 +125,35 @@ kubectl kcp --version
 # Check current workspace
 kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
 
-# Create a workspace
+# Create a test workspace
 kubectl create-workspace my-first-workspace --enter \
   --server=https://kcp.example.com:443/clusters/root \
-  --token=system-token \
+  --token=admin-token \
   --insecure-skip-tls-verify
 
-# Verify you're in it
-kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
-# Should show: root:my-first-workspace
+# Create a workflow-admin workspace
+kubectl create-workspace workflow-admin --enter \
+  --server=https://kcp.example.com:443/clusters/root \
+  --token=admin-token \
+  --insecure-skip-tls-verify
 
-# Go back to root
-kubectl ws :root --kubeconfig=kcp-external-admin.kubeconfig
+kubectl create clusterrolebinding wf-admin-access \
+  --clusterrole=cluster-admin \
+  --group=workspace:workflow-admin \
+  --server=https://kcp.example.com:443/clusters/root:workflow-admin \
+  --token=admin-token --insecure-skip-tls-verify
+
+# Create a workflow-user workspace
+kubectl create-workspace workflow-user --enter \
+  --server=https://kcp.example.com:443/clusters/root \
+  --token=admin-token \
+  --insecure-skip-tls-verify
+
+kubectl create clusterrolebinding wf-user-access \
+  --clusterrole=cluster-admin \
+  --group=workspace:workflow-user \
+  --server=https://kcp.example.com:443/clusters/root:workflow-user \
+  --token=admin-token --insecure-skip-tls-verify  
+
+kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
 ```
