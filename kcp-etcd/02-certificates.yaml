@@ -25,7 +25,7 @@ spec:
     - "127.0.0.1"
   issuerRef:
     name: etcd-ca-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
 ---
 # ─── etcd peer cert (required even for single-node) ─────────────
@@ -55,5 +55,5 @@ spec:
     - "127.0.0.1"
   issuerRef:
     name: etcd-ca-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io

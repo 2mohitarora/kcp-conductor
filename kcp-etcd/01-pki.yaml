@@ -1,9 +1,9 @@
 # ─── Self-signed bootstrap issuer ────────────────────────────────
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: Issuer
 metadata:
   name: etcd-selfsigned
-  namespace: cert-manager
+  namespace: etcd
 spec:
   selfSigned: {}
 ---
@@ -12,7 +12,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: etcd-ca
-  namespace: cert-manager
+  namespace: etcd
 spec:
   isCA: true
   commonName: etcd-ca
@@ -24,15 +24,15 @@ spec:
     size: 2048
   issuerRef:
     name: etcd-selfsigned
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
 ---
 # ─── Issuer backed by the etcd CA (signs server + peer + client certs) ──
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: Issuer
 metadata:
   name: etcd-ca-issuer
-  namespace: cert-manager
+  namespace: etcd
 spec:
   ca:
     secretName: etcd-ca

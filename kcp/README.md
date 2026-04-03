@@ -17,31 +17,17 @@ kubectl get secret etcd-ca -n kcp
 kubectl get secret etcd-ca -n kcp -o yaml
 ```
 
-### Create etcd client certificate
+### Create etcd client certificate issuer
 ```
-kubectl apply -f 01-kcp-etcd-client-cert.yaml
+kubectl apply -f 01-etcd-ca-issuer.yaml
 
-# Make sure certificate is ready
-kubectl get certificate -n kcp
-```
-
-### Create kcp required certificates
-```
-# Change dnsNames in 02-kcp-certificates.yaml (2 places)
-
-kubectl apply -f 02-kcp-certificates.yaml
+kubectl get issuer -n kcp
 ```
 
 ### Install kcp via helm
 ```
 helm repo add kcp https://kcp-dev.github.io/helm-charts
 helm repo update
-
-# Inspect the chart before applying values
-helm show values kcp/kcp > 03-kcp-defaults.yaml
-
-# Compare with your values to catch any key mismatches
-# Change externalHostname in 03-kcp-values.yaml
 
 # Install kcp
 helm install kcp kcp/kcp \

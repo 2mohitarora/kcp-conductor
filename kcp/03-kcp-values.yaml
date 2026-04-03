@@ -1,53 +1,23 @@
-# kcp-values.yaml
-externalHostname: "kcp.example.com" # <-- CHANGE THIS
-
+externalHostname: "kcp.example.com"
+etcd:
+  enabled: false
 kcp:
-  # Disable embedded etcd — we're using external
+  replicas: 1
   etcd:
-    embedded: false
-
-    # External etcd connection
-    servers:
-      - "https://etcd.etcd.svc.cluster.local:2379"
-      #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      #   Adjust this to your etcd service DNS name
-
-    # TLS for connecting to etcd
+    serverAddress: "https://etcd.etcd.svc.cluster.local:2379"
     clientCertificate:
-      existingSecret: "etcd-client-kcp-tls"
-      certKey: "tls.crt"
-      keyKey: "tls.key"
-
-    caSecret:
-      name: "etcd-ca"
-      key: "ca.crt" # or "tls.crt" depending on your secret structure
-
-  # kcp server TLS
-  tls:
-    existingSecret: "kcp-server-tls"
-
-  # Service account signing
-  serviceAccount:
-    existingSecret: "kcp-service-account-tls"
-
-  # Volume storage class for kcp data (audit logs, etc.)
-  volumeClassName: "" # <-- Set if you have a specific storage class, or leave empty for default
-
+      issuer: "etcd-client-issuer"
+      commonName: root
+  leaderElection:
+    enabled: false
 kcpFrontProxy:
-  # Front-proxy TLS
-  tls:
-    existingSecret: "kcp-front-proxy-server-tls"
-
-  # Client cert to authenticate to kcp shard
-  clientCertificate:
-    existingSecret: "kcp-front-proxy-client-tls"
-
-  # RequestHeader auth certs
-  requestheaderClientCA:
-    existingSecret: "kcp-requestheader-ca-tls"
-  requestheaderClientCert:
-    existingSecret: "kcp-front-proxy-requestheader-client-tls"
-
-  # Service type — we'll use ClusterIP and expose via Gateway API
+  replicas: 1
   service:
     type: ClusterIP
+certificates:
+  privateKeys:
+    algorithm: RSA
+    size: 2048
+  dnsNames:
+    - localhost
+    - "kcp.example.com" # <-- match your externalHostname

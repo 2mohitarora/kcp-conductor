@@ -1,0 +1,9 @@
+# etcd-ca-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: etcd-client-issuer
+  namespace: kcp # <-- must match kcp namespace
+spec:
+  ca:
+    secretName: etcd-ca
