@@ -16,10 +16,10 @@ spec:
     - client auth
   dnsNames:
     - "etcd-0"
-    - "etcd-0.etcd"
-    - "etcd-0.etcd.etcd"
-    - "etcd-0.etcd.etcd.svc"
-    - "etcd-0.etcd.etcd.svc.cluster.local"
+    - "etcd-0.etcd-ss"
+    - "etcd-0.etcd-ss.etcd"
+    - "etcd-0.etcd-ss.etcd.svc"
+    - "etcd-0.etcd-ss.etcd.svc.cluster.local"
     - "etcd.etcd.svc.cluster.local"
     - "localhost"
   ipAddresses:
