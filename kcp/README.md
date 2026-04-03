@@ -72,8 +72,6 @@ kubectl get pods -n kcp
 # kcp-front-proxy-<hash>  1/1  Running
 
 # Check logs for errors
-kubectl logs -n kcp -l app=kcp --tail=50
-kubectl logs -n kcp -l app=kcp-front-proxy --tail=50
 ```
 ### Add kcp front end proxy route
 ```
@@ -109,10 +107,7 @@ kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data
 kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.key}' | base64 -d > /tmp/kcp-client.key
 
 # Use it
-KUBECONFIG=kcp-external-admin.kubeconfig kubectl api-resources --insecure-skip-tls-verify
-export KUBECONFIG=kcp-external-admin.kubeconfig
-# List workspaces
-kubectl get workspaces --insecure-skip-tls-verify
+kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
 ``` 
 
 ### Install kcp kubectl plugin
