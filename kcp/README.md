@@ -97,12 +97,18 @@ curl -k --resolve kcp.example.com:443:192.168.97.254 https://kcp.example.com/rea
 # Expected: "ok"
 
 # Test with kubectl
+
+# Add Gateway IP to /etc/hosts
+kubectl get svc -n cilium
+echo "192.168.97.254 kcp.example.com" | sudo tee -a /etc/hosts
+
+
 # First, extract the admin kubeconfig (the Helm chart creates one)
 kubectl get secret -n kcp kcp-external-admin-kubeconfig -o jsonpath='{.data.kubeconfig}' \
-  | base64 -d > kcp-admin.kubeconfig
+  | base64 -d > kcp-external-admin.kubeconfig
 
 # Use it
-KUBECONFIG=kcp-admin.kubeconfig kubectl api-resources
+KUBECONFIG=kcp-external-admin.kubeconfig kubectl api-resources --insecure-skip-tls-verify
 ``` 
 
 ### Install kcp kubectl plugin
