@@ -25,7 +25,7 @@ docker context list
 
 # Create your first vcluster
 ```
-vcluster create cluster-1 --driver docker --values cluster-1.yaml
+sudo vcluster create cluster-1 --driver docker --values cluster-1.yaml
 
 helm repo add cilium https://helm.cilium.io/
 helm repo add jetstack https://charts.jetstack.io
