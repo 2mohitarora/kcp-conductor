@@ -125,12 +125,6 @@ kubectl kcp --version
 # Check current workspace
 kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
 
-# Create a test workspace
-kubectl create-workspace my-first-workspace --enter \
-  --server=https://kcp.example.com:443/clusters/root \
-  --token=admin-token \
-  --insecure-skip-tls-verify
-
 # Create a workflow-admin workspace
 kubectl create-workspace workflow-admin --enter \
   --server=https://kcp.example.com:443/clusters/root \
@@ -155,5 +149,18 @@ kubectl create clusterrolebinding wf-user-access \
   --server=https://kcp.example.com:443/clusters/root:workflow-user \
   --token=admin-token --insecure-skip-tls-verify  
 
+# Get all workspaces
 kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
+
+# Each user has full admin in their workspace only
+kubectl get ns --kubeconfig=workflow-admin.kubeconfig
+kubectl create ns test --kubeconfig=workflow-admin.kubeconfig
+
+kubectl get ns --kubeconfig=workflow-user.kubeconfig
+kubectl create ns test --kubeconfig=workflow-user.kubeconfig
+
+# But can't see each other's workspace
+kubectl get ns --kubeconfig=workflow-admin.kubeconfig \
+  --server=https://kcp.example.com:443/clusters/root:workflow-user
+# Should get Forbidden
 ```
