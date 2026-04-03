@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-etcd-client
+  namespace: kcp
+spec:
+  secretName: kcp-etcd-client-cert
+  issuerRef:
+    name: etcd-client-issuer
+    kind: Issuer
+  commonName: root
+  usages:
+    - client auth

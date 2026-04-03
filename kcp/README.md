@@ -1,27 +1,38 @@
 ### Create kcp namespace
 kubectl apply -f 00-namespace.yaml
 
-# Copy the CA secret to kcp namespace
+### Copy the CA secret to kcp namespace
 ```
 # Find the etcd CA secret
 kubectl get secrets -n etcd | grep ca
 
-kubectl get secret etcd-ca -n cert-manager -o yaml | \
+kubectl get secret etcd-ca -n etcd -o yaml | \
   sed '/namespace:/d' | \
   kubectl apply -n kcp -f -
 
 # Verify
 kubectl get secret etcd-ca -n kcp
-
-# Also verify in yaml format
-kubectl get secret etcd-ca -n kcp -o yaml
 ```
 
-### Create etcd client certificate issuer
+### Create etcd client certificate issuer and client certificate
 ```
 kubectl apply -f 01-etcd-ca-issuer.yaml
 
 kubectl get issuer -n kcp
+
+kubectl apply -f 02-kcp-etcd-client.yaml
+
+kubectl get certificate -n kcp
+```
+
+### Create etcd server CA (so kcp can verify etcd's TLS)
+```
+kubectl create secret generic kcp-etcd-client-ca -n kcp \
+  --from-literal=tls.crt="$(kubectl get secret etcd-ca -n kcp -o jsonpath='{.data.tls\.crt}' | base64 -d)"
+
+# Verify
+kubectl get secret kcp-etcd-client-ca -n kcp
+
 ```
 
 ### Install kcp via helm

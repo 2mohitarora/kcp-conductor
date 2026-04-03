@@ -5,9 +5,6 @@ kcp:
   replicas: 1
   etcd:
     serverAddress: "https://etcd.etcd.svc.cluster.local:2379"
-    clientCertificate:
-      issuer: "etcd-client-issuer"
-      commonName: root
   leaderElection:
     enabled: false
 kcpFrontProxy:
