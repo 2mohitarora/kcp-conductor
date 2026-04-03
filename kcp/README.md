@@ -20,6 +20,9 @@ kubectl get secret etcd-ca -n kcp -o yaml
 ### Create etcd client certificate
 ```
 kubectl apply -f 01-kcp-etcd-client-cert.yaml
+
+# Make sure certificate is ready
+kubectl get certificate -n kcp
 ```
 
 ### Create kcp required certificates
