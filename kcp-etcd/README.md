@@ -6,7 +6,7 @@ kubectl apply -f 01-pki.yaml
 ```
 kubectl -n cert-manager wait --for=condition=Ready certificate/etcd-ca --timeout=120s
 
-# Copy it to etcd namespace
+# Copy CA secret to etcd namespace
 kubectl get secret etcd-ca -n cert-manager -o yaml | \
   sed '/namespace:/d' | \
   kubectl apply -n etcd -f -
