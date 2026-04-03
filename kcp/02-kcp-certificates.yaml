@@ -1,0 +1,186 @@
+# kcp-certificates.yaml
+---
+# Self-signed issuer for kcp's own CA
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kcp-selfsigned
+  namespace: kcp
+spec:
+  selfSigned: {}
+---
+# kcp CA certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-ca
+  namespace: kcp
+spec:
+  isCA: true
+  secretName: kcp-ca-tls
+  commonName: kcp-ca
+  duration: 87600h # 10 years
+  renewBefore: 2160h # 90 days
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: kcp-selfsigned
+    kind: Issuer
+---
+# Issuer backed by the kcp CA
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kcp-ca-issuer
+  namespace: kcp
+spec:
+  ca:
+    secretName: kcp-ca-tls
+---
+# kcp server certificate (used by the kcp API server / shard)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-server
+  namespace: kcp
+spec:
+  secretName: kcp-server-tls
+  duration: 8760h
+  renewBefore: 360h
+  commonName: kcp
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - "kcp"
+    - "kcp.kcp.svc"
+    - "kcp.kcp.svc.cluster.local"
+    - "localhost"
+    # IMPORTANT: Add your external hostname here
+    - "kcp.example.com"
+  ipAddresses:
+    - "127.0.0.1"
+  issuerRef:
+    name: kcp-ca-issuer
+    kind: Issuer
+---
+# Front-proxy server certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-front-proxy-server
+  namespace: kcp
+spec:
+  secretName: kcp-front-proxy-server-tls
+  duration: 8760h
+  renewBefore: 360h
+  commonName: kcp-front-proxy
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - server auth
+  dnsNames:
+    - "kcp-front-proxy"
+    - "kcp-front-proxy.kcp.svc"
+    - "kcp-front-proxy.kcp.svc.cluster.local"
+    - "localhost"
+    - "kcp.example.com" # <-- CHANGE THIS to your actual hostname
+  ipAddresses:
+    - "127.0.0.1"
+  issuerRef:
+    name: kcp-ca-issuer
+    kind: Issuer
+---
+# Front-proxy client cert (for front-proxy to authenticate to kcp shard)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-front-proxy-client
+  namespace: kcp
+spec:
+  secretName: kcp-front-proxy-client-tls
+  duration: 8760h
+  renewBefore: 360h
+  commonName: front-proxy-client
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - client auth
+  issuerRef:
+    name: kcp-ca-issuer
+    kind: Issuer
+---
+# Service account signing key (kcp needs this for token signing)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-service-account
+  namespace: kcp
+spec:
+  secretName: kcp-service-account-tls
+  duration: 87600h
+  renewBefore: 2160h
+  commonName: service-accounts
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  usages:
+    - any
+  issuerRef:
+    name: kcp-ca-issuer
+    kind: Issuer
+---
+# RequestHeader CA - used by front-proxy for request header authentication
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-requestheader-ca
+  namespace: kcp
+spec:
+  isCA: true
+  secretName: kcp-requestheader-ca-tls
+  commonName: kcp-requestheader-ca
+  duration: 87600h
+  renewBefore: 2160h
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: kcp-selfsigned
+    kind: Issuer
+---
+# Issuer for requestheader client certs
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kcp-requestheader-ca-issuer
+  namespace: kcp
+spec:
+  ca:
+    secretName: kcp-requestheader-ca-tls
+---
+# Front-proxy requestheader client cert
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kcp-front-proxy-requestheader-client
+  namespace: kcp
+spec:
+  secretName: kcp-front-proxy-requestheader-client-tls
+  duration: 8760h
+  renewBefore: 360h
+  commonName: front-proxy-client
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - client auth
+  issuerRef:
+    name: kcp-requestheader-ca-issuer
+    kind: Issuer

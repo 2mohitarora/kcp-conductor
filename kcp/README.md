@@ -1,78 +1,124 @@
-# Create kcp namespace
+### Create kcp namespace
 kubectl apply -f 00-namespace.yaml
 
-# Copy client cert to kcp namespace 
-chmod +x 00-copy-client-cert-to-kcp.sh
-./00-copy-client-cert-to-kcp.sh
+# Copy the CA secret to kcp namespace
+```
+# Find the etcd CA secret
+kubectl get secrets -n etcd | grep ca
 
-# Verify the secret landed in kcp namespace
-kubectl -n kcp get secret kcp-etcd-client
 
-# ─── Step 1: PKI bootstrap ──────────────────────────────────────
-kubectl apply -f 01-pki-issuers.yaml
-kubectl -n kcp wait --for=condition=Ready certificate/kcp-pki-ca --timeout=120s
+kubectl get secret etcd-ca -n etcd -o yaml \
+  | sed 's/namespace: etcd/namespace: kcp/' \
+  | kubectl apply -f -
 
-# ─── Step 2: Intermediate CAs ───────────────────────────────────
-kubectl apply -f 02-intermediate-cas.yaml
-# Wait for all CAs to be Ready
-kubectl -n kcp get certificates -w
+# Verify
+kubectl get secret etcd-ca -n kcp
 
-# ─── Step 3: Issuers ────────────────────────────────────────────
-kubectl apply -f 03-issuers.yaml
-
-# ─── Step 4: All certificates ───────────────────────────────────
-kubectl apply -f 06-server-certificates.yaml
-kubectl apply -f 07-front-proxy-certificates.yaml
-kubectl apply -f 08-server-kubeconfigs.yaml
-kubectl apply -f 09-front-proxy-kubeconfig.yaml
-# Wait for all certs
-kubectl -n kcp get certificates -w
-
-# ─── Step 5: Generate front-proxy kubeconfig ─────────────────────
-kubectl apply -f 14-front-proxy-kubeconfig-job.yaml
-kubectl -n kcp wait --for=condition=Complete \
-  job/kcp-front-proxy-generate-kubeconfig --timeout=120s
-
-# ─── Step 6: Deploy kcp server + front-proxy ─────────────────────
-kubectl apply -f 10-server.yaml
-kubectl apply -f 11-front-proxy-configmap.yaml
-kubectl apply -f 12-front-proxy.yaml
-
-kubectl -n kcp rollout status deployment/kcp --timeout=300s
-kubectl -n kcp rollout status deployment/kcp-front-proxy --timeout=120s
-
-# ─── Step 7: Generate admin kubeconfig ───────────────────────────
-kubectl apply -f 13-admin-kubeconfig-job.yaml
-kubectl -n kcp wait --for=condition=Complete \
-  job/kcp-generate-admin-kubeconfig --timeout=120s
-
-# ─── Step 8: Extract admin kubeconfig ────────────────────────────
-kubectl -n kcp get secret kcp-external-admin-kubeconfig \
-  -o jsonpath='{.data.kubeconfig}' | base64 -d > kcp-admin.kubeconfig
-
-## Verify
-
-```bash
-KUBECONFIG=./kcp-admin.kubeconfig kubectl api-resources
-KUBECONFIG=./kcp-admin.kubeconfig kubectl get workspaces
+# Also verify in yaml format
+kubectl get secret etcd-ca -n kcp -o yaml
 ```
 
-## Files
+### Create etcd client certificate
+```
+kubectl apply -f 01-kcp-etcd-client-cert.yaml
+```
+
+### Create kcp required certificates
+```
+# Change dnsNames in 02-kcp-certificates.yaml (2 places)
+
+kubectl apply -f 02-kcp-certificates.yaml
+```
+
+### Install kcp via helm
+```
+helm repo add kcp https://kcp-dev.github.io/helm-charts
+helm repo update
+
+# Inspect the chart before applying values
+helm show values kcp/kcp > 03-kcp-defaults.yaml
+
+# Compare with your values to catch any key mismatches
+# Change externalHostname in 03-kcp-values.yaml
+
+# Install kcp
+helm install kcp kcp/kcp \
+  --namespace kcp \
+  --values 03-kcp-values.yaml \
+  --wait \
+  --timeout 5m
+```
+### Verify
 
 ```
-00-namespace.yaml               # kcp namespace
-01-pki-issuers.yaml             # Self-signed bootstrap → root CA → intermediate issuer
-02-intermediate-cas.yaml        # 5 intermediate CAs (server, front-proxy, SA, etc.)
-03-issuers.yaml                 # 5 cert-manager Issuers
-06-server-certificates.yaml     # kcp server + virtual workspace + SA signing certs
-07-front-proxy-certificates.yaml  # front-proxy serving, requestheader, VW, admin certs
-08-server-kubeconfigs.yaml      # Internal admin client cert
-09-front-proxy-kubeconfig.yaml  # Front-proxy → kcp client cert
-10-server.yaml                  # kcp server Deployment + Service
-                                #   connects to etcd via: etcd-client.etcd.svc:2379
-                                #   uses secret: kcp-etcd-client (from etcd namespace)
-11-front-proxy-configmap.yaml   # Path mapping config
-12-front-proxy.yaml             # Front-proxy Deployment + Service (:8443)
-13-admin-kubeconfig-job.yaml    # Job to assemble admin kubeconfig Secret
-14-front-proxy-kubeconfig-job.yaml  # Job to assemble front-proxy kubeconfig
+# Check pods
+kubectl get pods -n kcp
+
+# You should see:
+# kcp-<hash>              1/1  Running
+# kcp-front-proxy-<hash>  1/1  Running
+
+# Check logs for errors
+kubectl logs -n kcp -l app=kcp --tail=50
+kubectl logs -n kcp -l app=kcp-front-proxy --tail=50
+```
+### Add kcp front end proxy route
+```
+# Change hostname in 04-kcp-route.yaml
+
+kubectl apply -f 04-kcp-route.yaml
+```
+
+### Configure DNS
+```
+# Get the Gateway's external IP
+kubectl get gateway default-gateway -n cilium
+
+# Create a DNS A record:
+# kcp.example.com → <Gateway External IP>
+```
+
+### Verify kcp is reachable
+```
+# Test with curl (use -k for self-signed certs)
+curl -k https://kcp.example.com/readyz
+# Expected: "ok"
+
+# Test with kubectl
+# First, extract the admin kubeconfig (the Helm chart creates one)
+kubectl get secret -n kcp kcp-admin-kubeconfig -o jsonpath='{.data.kubeconfig}' \
+  | base64 -d > kcp-admin.kubeconfig
+
+# Use it
+KUBECONFIG=kcp-admin.kubeconfig kubectl api-resources
+``` 
+
+### Install kcp kubectl plugin
+```
+# Install the workspace plugin
+kubectl krew install kcp
+
+# Or download directly from GitHub releases:
+# https://github.com/kcp-dev/kcp/releases
+```
+
+### Test workspace operations
+```
+export KUBECONFIG=kcp-admin.kubeconfig
+
+# Check current workspace
+kubectl ws .
+
+# List workspaces
+kubectl get workspaces
+
+# Create a workspace
+kubectl ws create my-first-workspace --enter
+
+# Verify you're in it
+kubectl ws .
+# Should show: root:my-first-workspace
+
+# Go back to root
+kubectl ws root
 ```

@@ -25,7 +25,7 @@ spec:
     - "127.0.0.1"
   issuerRef:
     name: etcd-ca-issuer
-    kind: Issuer
+    kind: ClusterIssuer
     group: cert-manager.io
 ---
 # ─── etcd peer cert (required even for single-node) ─────────────
@@ -55,29 +55,5 @@ spec:
     - "127.0.0.1"
   issuerRef:
     name: etcd-ca-issuer
-    kind: Issuer
-    group: cert-manager.io
----
-# ─── Client cert for kcp to authenticate to etcd ────────────────
-#
-# This cert will need to be copied to the kcp namespace.
-#
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: etcd-client-kcp
-  namespace: etcd
-spec:
-  secretName: etcd-client-kcp-tls
-  duration: 8760h
-  renewBefore: 360h
-  commonName: kcp
-  privateKey:
-    algorithm: RSA
-    size: 2048
-  usages:
-    - client auth
-  issuerRef:
-    name: etcd-ca-issuer
-    kind: Issuer
+    kind: ClusterIssuer
     group: cert-manager.io
