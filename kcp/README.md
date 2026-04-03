@@ -103,9 +103,9 @@ kubectl get svc -n cilium
 echo "192.168.97.254 kcp.example.com" | sudo tee -a /etc/hosts
 
 
-# First, extract the admin kubeconfig (the Helm chart creates one)
-kubectl get secret -n kcp kcp-external-admin-kubeconfig -o jsonpath='{.data.kubeconfig}' \
-  | base64 -d > kcp-external-admin.kubeconfig
+# Extract client cert and key
+kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/kcp-client.crt
+kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.key}' | base64 -d > /tmp/kcp-client.key
 
 # Use it
 KUBECONFIG=kcp-external-admin.kubeconfig kubectl api-resources --insecure-skip-tls-verify
