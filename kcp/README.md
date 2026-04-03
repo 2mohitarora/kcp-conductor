@@ -85,7 +85,7 @@ curl -k --resolve kcp.example.com:443:192.168.97.254 https://kcp.example.com/rea
 
 # Test with kubectl
 # First, extract the admin kubeconfig (the Helm chart creates one)
-kubectl get secret -n kcp kcp-admin-kubeconfig -o jsonpath='{.data.kubeconfig}' \
+kubectl get secret -n kcp kcp-external-admin-kubeconfig -o jsonpath='{.data.kubeconfig}' \
   | base64 -d > kcp-admin.kubeconfig
 
 # Use it
