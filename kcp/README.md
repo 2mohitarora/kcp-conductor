@@ -46,6 +46,19 @@ helm install kcp kcp/kcp \
   --values 03-kcp-values.yaml \
   --wait \
   --timeout 5m
+
+# Once services are created get clusterip of kcp-front-proxy
+
+kubectl get svc -n kcp | grep front-proxy
+
+Update 031-kcp-upgrade-values.yaml with clusterip of kcp-front-proxy
+
+helm upgrade kcp kcp/kcp \
+  --namespace kcp \
+  --values 031-kcp-upgrade-values.yaml \
+  --wait \
+  --timeout 5m
+
 ```
 ### Verify
 
