@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: etcd-selfsigned
-  namespace: etcd
+  namespace: cert-manager
 spec:
   selfSigned: {}
 ---
@@ -32,7 +32,7 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: etcd-ca-issuer
-  namespace: etcd
+  namespace: cert-manager
 spec:
   ca:
     secretName: etcd-ca

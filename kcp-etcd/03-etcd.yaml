@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: etcd
+  name: etcd-ss
   namespace: etcd
   labels:
     app: etcd
@@ -24,7 +24,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: etcd-client
+  name: etcd
   namespace: etcd
   labels:
     app: etcd
@@ -46,7 +46,7 @@ metadata:
   labels:
     app: etcd
 spec:
-  serviceName: etcd
+  serviceName: etcd-ss
   replicas: 1
   selector:
     matchLabels:
