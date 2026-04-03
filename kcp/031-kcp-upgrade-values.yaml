@@ -1,0 +1,28 @@
+externalHostname: "kcp.example.com"
+externalPort: "443"
+etcd:
+  enabled: false
+kcp:
+  replicas: 1
+  etcd:
+    serverAddress: "https://etcd.etcd.svc.cluster.local:2379"
+  leaderElection:
+    enabled: false
+  hostAliases:
+    enabled: true
+    values:
+      - ip: "10.99.96.26"
+        hostnames:
+          - "kcp.example.com"
+kcpFrontProxy:
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 443
+certificates:
+  privateKeys:
+    algorithm: RSA
+    size: 2048
+  dnsNames:
+    - localhost
+    - "kcp.example.com" # <-- match your externalHostname
