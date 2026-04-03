@@ -1,6 +1,7 @@
 ### Create kcp namespace
+```
 kubectl apply -f 00-namespace.yaml
-
+```
 ### Copy the CA secret to kcp namespace
 ```
 # Find the etcd CA secret
