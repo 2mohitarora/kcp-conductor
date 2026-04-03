@@ -13,7 +13,8 @@ kcp:
     fileName: auth-token.csv
     config: |
       admin-token,admin,5555-5555-5555-5555,"system:kcp:admin"
-      system-token,system,6666-6666-6666-6666,"system:masters"
+      wf-admin-token,wf-admin,1111-1111-1111-1111,"workspace:workflow-admin"
+      wf-user-token,wf-user,2222-2222-2222-2222,"workspace:workflow-user"
   hostAliases:
     enabled: true
     values:
