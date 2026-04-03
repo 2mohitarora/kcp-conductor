@@ -106,11 +106,6 @@ kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data
 
 # Test with kubectl
 kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
-
-# Extract internal client cert and key
-kubectl get secret kcp-internal-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/kcp-internal-client.crt
-kubectl get secret kcp-internal-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.key}' | base64 -d > /tmp/kcp-internal-client.key
-
 ``` 
 
 ### Install kcp kubectl plugin

@@ -8,6 +8,12 @@ kcp:
     serverAddress: "https://etcd.etcd.svc.cluster.local:2379"
   leaderElection:
     enabled: false
+  tokenAuth:
+    enabled: true
+    fileName: auth-token.csv
+    config: |
+      admin-token,admin,5555-5555-5555-5555,"system:kcp:admin"
+      system-token,system,6666-6666-6666-6666,"system:masters"
   hostAliases:
     enabled: true
     values:
