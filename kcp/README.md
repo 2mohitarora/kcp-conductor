@@ -163,4 +163,8 @@ kubectl create ns test --kubeconfig=workflow-user.kubeconfig
 kubectl get ns --kubeconfig=workflow-admin.kubeconfig \
   --server=https://kcp.example.com:443/clusters/root:workflow-user
 # Should get Forbidden
+
+# Explore further
+kubectl get apibindings --kubeconfig=workflow-user.kubeconfig
+kubectl get logicalclusters --kubeconfig=workflow-user.kubeconfig
 ```
