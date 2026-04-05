@@ -11,7 +11,7 @@ helm repo update
 helm upgrade --install init-agent-host kcp/init-agent \
   --namespace kcp \
   --values helm/00-kcp-init-agent-values.yaml \
-  --set "targets={}" \
+  --set "targets={host}" \
   --wait \
   --timeout 5m 
 ```
