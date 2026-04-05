@@ -69,3 +69,7 @@ kubectl apply -f 03-workflow-export.yaml --kubeconfig=./kubeconfig/workflow-admi
 kubectl create-workspace workflow-user --type=workflow \
   --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig
 ```  
+5. Verify initialization is happening
+```
+kubectl get workspaces --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig
+```
