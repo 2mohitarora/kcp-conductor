@@ -25,3 +25,5 @@ spec:
   sources:
     - template:
         name: workflow-ws-init-template
+
+# More can be added here for RBAC policies
