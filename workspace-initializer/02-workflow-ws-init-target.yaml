@@ -1,0 +1,27 @@
+apiVersion: initialization.kcp.io/v1alpha1
+kind: InitTemplate
+metadata:
+  name: workflow-ws-init-template
+spec:
+  template: |
+    apiVersion: apis.kcp.io/v1alpha1
+    kind: APIBinding
+    metadata:
+      name: bind-workflows
+    spec:
+      reference:
+        export:
+          path: "root:workflow-admin"
+          name: "workflows"
+---
+apiVersion: initialization.kcp.io/v1alpha1
+kind: InitTarget
+metadata:
+  name: workflow-ws-init-target
+spec:
+  workspaceTypeRef:
+    name: workflow
+    path: root
+  sources:
+    - template:
+        name: workflow-ws-init-template
