@@ -3,6 +3,7 @@
 chmod +x kubeconfig/00-create-init-agent-kubeconfig.sh
 ./kubeconfig/00-create-init-agent-kubeconfig.sh
 ```
+
 ### Install kcp init-agent on hosting cluster 
 ```
 helm repo add kcp https://kcp-dev.github.io/helm-charts
@@ -58,4 +59,13 @@ kubectl apply -f 01-workflow-workspacetype.yaml --kubeconfig=./kubeconfig/kcp-ex
 kubectl apply -f 02-workflow-ws-init-target.yaml --kubeconfig=./kubeconfig/kcp-init-agent.kubeconfig
 ```
 
-3. Create a workspace with the workflow type
+3. Add a sample workflow in worflow-admin workspace and create an API export for it
+```
+kubectl apply -f 03-workflow-export.yaml --kubeconfig=./kubeconfig/workflow-admin.kubeconfig
+```
+
+4. Create a sample workspace with the workflow type
+```
+kubectl create-workspace workflow-user --type=workflow \
+  --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig
+```  

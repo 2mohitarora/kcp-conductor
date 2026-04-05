@@ -1,0 +1,50 @@
+apiVersion: apis.kcp.io/v1alpha1
+kind: APIResourceSchema
+metadata:
+  name: v1.workflows.example.com
+spec:
+  group: example.com
+  names:
+    kind: Workflow
+    listKind: WorkflowList
+    plural: workflows
+    singular: workflow
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        description: "Workflow definition"
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              description:
+                type: string
+              steps:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+            required:
+              - steps
+      subresources:
+        status: {}
+---
+apiVersion: apis.kcp.io/v1alpha2
+kind: APIExport
+metadata:
+  name: workflows
+spec:
+  resources:
+    - group: example.com
+      name: workflows
+      schema: v1.workflows.example.com
+      storage:
+        crd: {}
