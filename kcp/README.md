@@ -99,10 +99,6 @@ curl -k --resolve kcp.example.com:443:192.168.97.254 https://kcp.example.com/rea
 kubectl get svc -n cilium
 echo "192.168.97.254 kcp.example.com" | sudo tee -a /etc/hosts
 
-# Extract external client cert and key
-kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/kcp-client.crt
-kubectl get secret kcp-external-admin-kubeconfig-cert -n kcp -o jsonpath='{.data.tls\.key}' | base64 -d > /tmp/kcp-client.key
-
 # Test with kubectl
 kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
 ``` 
