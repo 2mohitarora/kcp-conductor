@@ -48,14 +48,14 @@ kubectl get clusterrole --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig
 
 ### Steps to create workspace of type workflow and see if it is getting initialized properly
 
-1. Apply the workspace type
+1. Create the WorkspaceType in root
 ```
-kubectl apply -f 01-workflow-workspacetype.yaml
+kubectl apply -f 01-workflow-workspacetype.yaml --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig
 ```
 
-2. Apply the init target
+2. Create InitTemplate + InitTarget in root:init-agent
 ```
-kubectl apply -f 02-workflow.yaml
+kubectl apply -f 02-workflow-ws-init-target.yaml --kubeconfig=./kubeconfig/kcp-init-agent.kubeconfig
 ```
 
 3. Create a workspace with the workflow type
