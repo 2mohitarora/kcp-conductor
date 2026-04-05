@@ -167,4 +167,13 @@ kubectl get ns --kubeconfig=workflow-admin.kubeconfig \
 # Explore further
 kubectl get apibindings --kubeconfig=workflow-user.kubeconfig
 kubectl get logicalclusters --kubeconfig=workflow-user.kubeconfig
+kubectl get workspacetypes --server=https://kcp.example.com:443/clusters/root \
+  --token=admin-token \
+  --insecure-skip-tls-verify
+NAME           AGE
+home           27h
+organization   27h
+root           27h
+team           27h
+universal      27h
 ```
