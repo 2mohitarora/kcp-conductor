@@ -1,0 +1,136 @@
+# ─────────────────────────────────────────────────────────────────
+# Apply these to the PLATFORM workspace (root:platform).
+#
+# This creates:
+# 1. APIResourceSchema — the immutable schema for Workflow resources
+# 2. APIExport — makes the Workflow API available for binding
+#
+# Usage:
+#   KUBECONFIG=kcp-admin.kubeconfig kubectl ws root
+#   KUBECONFIG=kcp-admin.kubeconfig kubectl ws create platform --enter
+#   KUBECONFIG=kcp-admin.kubeconfig kubectl apply -f api-export.yaml
+# ─────────────────────────────────────────────────────────────────
+
+---
+# The schema definition. This is IMMUTABLE after creation.
+# To evolve the API, create a new APIResourceSchema with a new name
+# (e.g. v2.workflows.example.com) and update the APIExport.
+apiVersion: apis.kcp.io/v1alpha1
+kind: APIResourceSchema
+metadata:
+  name: v1.workflows.example.com
+spec:
+  group: example.com
+  names:
+    kind: Workflow
+    listKind: WorkflowList
+    plural: workflows
+    singular: workflow
+    shortNames:
+      - wf
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        description: "Workflow defines a multi-step automation pipeline"
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              description:
+                type: string
+              steps:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    image:
+                      type: string
+                    command:
+                      type: array
+                      items:
+                        type: string
+                    dependsOn:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - name
+            required:
+              - steps
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+                enum:
+                  - Pending
+                  - Running
+                  - Succeeded
+                  - Failed
+              startTime:
+                type: string
+                format: date-time
+              completionTime:
+                type: string
+                format: date-time
+              conditions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+                    reason:
+                      type: string
+                    message:
+                      type: string
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Steps
+          type: integer
+          jsonPath: ".spec.steps[*]"
+          description: "Number of steps"
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+
+---
+# The APIExport makes this schema available for other workspaces to bind.
+apiVersion: apis.kcp.io/v1alpha2
+kind: APIExport
+metadata:
+  name: workflows.example.com
+spec:
+  resources:
+    - group: example.com
+      name: workflows
+      schema: v1.workflows.example.com
+      storage:
+        crd: {}
+
+  # Permission claims: what your workflow controller needs to access
+  # in consumer workspaces beyond the Workflow resources themselves.
+  # Consumers must explicitly accept each claim.
+  #
+  # Uncomment these if your controller needs access to other resources:
+  #
+  # permissionClaims:
+  #   - group: ""
+  #     resource: "configmaps"    # e.g. to read workflow config
+  #   - group: ""
+  #     resource: "secrets"       # e.g. to inject credentials

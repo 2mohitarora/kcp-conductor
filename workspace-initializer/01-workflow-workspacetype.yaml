@@ -1,0 +1,15 @@
+# The custom WorkspaceType. When users create a workspace with --type workflow,
+# kcp adds "root:workflow" to the LogicalCluster's status.initializers and holds
+# the workspace in Initializing phase until the controller removes it.
+apiVersion: tenancy.kcp.io/v1alpha1
+kind: WorkspaceType
+metadata:
+  name: workflow
+spec:
+  initializer: true
+  limitAllowedChildren:
+    none: true
+  limitAllowedParents:
+    types:
+      - name: root
+        path: root

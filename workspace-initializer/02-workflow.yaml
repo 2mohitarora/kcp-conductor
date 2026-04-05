@@ -1,0 +1,52 @@
+apiVersion: initialization.kcp.io/v1alpha1
+kind: InitTemplate
+metadata:
+  name: workflow-ws-init-template
+spec:
+  template: |
+    apiVersion: apis.kcp.io/v1alpha1
+    kind: APIBinding
+    metadata:
+      name: bind-workflows
+    spec:
+      reference:
+        export:
+          path: "root:workflow-admin"
+          name: "workflows"
+---
+apiVersion: initialization.kcp.io/v1alpha1
+kind: InitTemplate
+metadata:
+  name: default-rbac
+spec:
+  template: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: workspace-user
+    rules:
+      - apiGroups: ["example.com"]
+        resources: ["workflows"]
+        verbs: ["get", "list", "create", "update", "delete"]
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: workspace-info
+    data:
+      clusterName: "{{ .ClusterName }}"
+      clusterPath: "{{ .ClusterPath }}"
+---
+apiVersion: initialization.kcp.io/v1alpha1
+kind: InitTarget
+metadata:
+  name: workflow-ws-init-target
+spec:
+  workspaceType:
+    name: workflow
+    path: root
+  sources:
+    - initTemplate:
+        name: workflow-ws-init-template
+    - initTemplate:
+        name: default-rbac
