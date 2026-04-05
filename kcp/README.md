@@ -121,35 +121,19 @@ kubectl kcp --version
 # Check current workspace
 kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
 
+# Create init-agent workspace
+kubectl create-workspace init-agent \
+  --kubeconfig=kcp-external-admin.kubeconfig
+
 # Create a workflow-admin workspace
-kubectl create-workspace workflow-admin --enter \
-  --server=https://kcp.example.com:443/clusters/root \
-  --token=admin-token \
-  --insecure-skip-tls-verify
+kubectl create-workspace workflow-admin \
+  --kubeconfig=kcp-external-admin.kubeconfig
 
 kubectl create clusterrolebinding wf-admin-access \
   --clusterrole=cluster-admin \
   --group=workspace:workflow-admin \
   --server=https://kcp.example.com:443/clusters/root:workflow-admin \
-  --token=admin-token --insecure-skip-tls-verify
-
-# Create a workflow-user workspace
-kubectl create-workspace workflow-user --enter \
-  --server=https://kcp.example.com:443/clusters/root \
-  --token=admin-token \
-  --insecure-skip-tls-verify
-
-kubectl create clusterrolebinding wf-user-access \
-  --clusterrole=cluster-admin \
-  --group=workspace:workflow-user \
-  --server=https://kcp.example.com:443/clusters/root:workflow-user \
-  --token=admin-token --insecure-skip-tls-verify  
-
-# Create a workflow-user workspace
-kubectl create-workspace init-agent --enter \
-  --server=https://kcp.example.com:443/clusters/root \
-  --token=admin-token \
-  --insecure-skip-tls-verify  
+  --kubeconfig=kcp-external-admin.kubeconfig
 
 # Get all workspaces
 kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
@@ -158,20 +142,12 @@ kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
 kubectl get ns --kubeconfig=workflow-admin.kubeconfig
 kubectl create ns test --kubeconfig=workflow-admin.kubeconfig
 
-kubectl get ns --kubeconfig=workflow-user.kubeconfig
-kubectl create ns test --kubeconfig=workflow-user.kubeconfig
-
-# But can't see each other's workspace
-kubectl get ns --kubeconfig=workflow-admin.kubeconfig \
-  --server=https://kcp.example.com:443/clusters/root:workflow-user
-# Should get Forbidden
-
 # Explore further
-kubectl get apibindings --kubeconfig=workflow-user.kubeconfig
-kubectl get logicalclusters --kubeconfig=workflow-user.kubeconfig
-kubectl get workspacetypes --server=https://kcp.example.com:443/clusters/root \
-  --token=admin-token \
-  --insecure-skip-tls-verify
+kubectl get apibindings --kubeconfig=workflow-admin.kubeconfig
+kubectl get logicalclusters --kubeconfig=workflow-admin.kubeconfig
+
+kubectl get workspacetypes --kubeconfig=kcp-external-admin.kubeconfig
+
 NAME           AGE
 home           27h
 organization   27h
