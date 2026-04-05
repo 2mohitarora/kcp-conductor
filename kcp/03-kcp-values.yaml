@@ -6,8 +6,6 @@ kcp:
   replicas: 1
   etcd:
     serverAddress: "https://etcd.etcd.svc.cluster.local:2379"
-  batteries:
-    # - workspace-types
   leaderElection:
     enabled: false
   tokenAuth:

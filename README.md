@@ -117,3 +117,5 @@ kubectl get pods --all-namespaces -w -o wide
 # Move to kcp etcd installation
 
 # Move to kcp installation
+
+# Move to kcp init-agent installation

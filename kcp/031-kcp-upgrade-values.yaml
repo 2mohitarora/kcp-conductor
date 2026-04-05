@@ -6,8 +6,6 @@ kcp:
   replicas: 1
   etcd:
     serverAddress: "https://etcd.etcd.svc.cluster.local:2379"
-  batteries:
-    # - workspace-types
   leaderElection:
     enabled: false
   tokenAuth:
@@ -20,7 +18,7 @@ kcp:
   hostAliases:
     enabled: true
     values:
-      - ip: "10.106.110.95"
+      - ip: "10.108.137.135"
         hostnames:
           - "kcp.example.com"
 kcpFrontProxy:

@@ -149,6 +149,12 @@ kubectl create clusterrolebinding wf-user-access \
   --server=https://kcp.example.com:443/clusters/root:workflow-user \
   --token=admin-token --insecure-skip-tls-verify  
 
+# Create a workflow-user workspace
+kubectl create-workspace init-agent --enter \
+  --server=https://kcp.example.com:443/clusters/root \
+  --token=admin-token \
+  --insecure-skip-tls-verify  
+
 # Get all workspaces
 kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
 
