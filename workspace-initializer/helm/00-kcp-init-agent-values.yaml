@@ -10,11 +10,11 @@ configWorkspace: "root:init-agent"
 configCluster:
   rbacSubject:
     kind: User
-    name: admin # matches your token auth admin user
+    name: logical-cluster-admin # matches your token auth admin user
 
 wstCluster:
   rbacSubject:
     kind: User
-    name: admin # same identity
+    name: logical-cluster-admin # same identity
 
 replicas: 1

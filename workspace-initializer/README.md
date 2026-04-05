@@ -46,7 +46,7 @@ kubectl get clusterrolebinding --kubeconfig=./kubeconfig/kcp-external-admin.kube
 kubectl get clusterrole --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig  
 ```
 
-### Steps to initialize workflow workspace
+### Steps to create workspace of type workflow and see if it is getting initialized properly
 
 1. Apply the workspace type
 ```
