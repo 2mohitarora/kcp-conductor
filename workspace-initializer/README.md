@@ -72,4 +72,5 @@ kubectl create-workspace workflow-user --type=workflow \
 5. Verify initialization is happening
 ```
 kubectl get workspaces --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig
+kubectl get apibindings --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
 ```
