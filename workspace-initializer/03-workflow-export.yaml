@@ -43,8 +43,8 @@ metadata:
   name: workflows
 spec:
   resources:
-    - group: example.com
-      name: workflows
-      schema: v1.workflows.example.com
+    - group: example.com #API group that serve resource. User write apiVersion: example.com/v1alpha1
+      name: workflows #This allows kubectl get workflows
+      schema: v1.workflows.example.com #Reference to the APIResourceSchema
       storage:
         crd: {}
