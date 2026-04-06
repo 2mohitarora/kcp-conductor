@@ -5,8 +5,14 @@ import (
 	"flag"
 	"os"
 
+	apisv1alpha1 "github.com/kcp-dev/kcp/sdk/apis/apis/v1alpha1"
+	corev1alpha1 "github.com/kcp-dev/kcp/sdk/apis/core/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -22,10 +28,21 @@ import (
 	"github.com/kcp-dev/multicluster-provider/apiexport"
 )
 
+// ─── Scheme registration ─────────────────────────────────────────
+// Register kcp API types so controller-runtime knows about
+// APIExportEndpointSlice, LogicalCluster, etc.
+
+var scheme = runtime.NewScheme()
+
+func init() {
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(apisv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(corev1alpha1.AddToScheme(scheme))
+}
+
 // ─── Workflow GVK ────────────────────────────────────────────────
 // Since we don't have generated Go types for our custom Workflow
 // resource, we use unstructured.Unstructured with the GVK set.
-// This is the simplest approach for a logging-only controller to prove the concept.
 
 var workflowGVK = schema.GroupVersionKind{
 	Group:   "example.com",
@@ -57,14 +74,13 @@ func main() {
 	// 3. Automatically connects to each shard's VW endpoint
 	// 4. Surfaces Workflow resources from ALL consumer workspaces
 	//    across all shards through a single reconcile loop
-	//
-	// When a new shard is added, the provider detects the new
-	// endpoint and starts watching it automatically.
 
 	provider, err := apiexport.New(
 		cfg,
 		apiExportName,
-		apiexport.Options{},
+		apiexport.Options{
+			Scheme: scheme,
+		},
 	)
 	if err != nil {
 		log.Error(err, "Failed to create apiexport provider")
@@ -72,15 +88,9 @@ func main() {
 	}
 
 	// ─── Create the multicluster manager ─────────────────────────
-	//
-	// This wraps controller-runtime's manager with multi-cluster
-	// awareness. The provider tells it which clusters (workspaces)
-	// exist and how to reach them.
 
 	mgr, err := mcmanager.New(cfg, provider, manager.Options{
-		// Standard controller-runtime manager options
-		// HealthProbeBindAddress: ":8081",
-		// MetricsBindAddress:    ":8080",
+		Scheme: scheme,
 	})
 	if err != nil {
 		log.Error(err, "Failed to create manager")
@@ -88,17 +98,6 @@ func main() {
 	}
 
 	// ─── Register the Workflow reconciler ─────────────────────────
-	//
-	// We use unstructured.Unstructured because we don't have
-	// generated Go types for Workflow. This is fine for a
-	// logging controller and common in kcp controllers that
-	// work with dynamic CRDs.
-	//
-	// The mcbuilder.ControllerManagedBy wires everything together:
-	// - Watches Workflow resources across all consumer workspaces
-	// - Routes reconcile events to our WorkflowReconciler
-	// - The reconcile.Request includes cluster information so
-	//   we know which workspace the event came from
 
 	workflowObj := &unstructured.Unstructured{}
 	workflowObj.SetGroupVersionKind(workflowGVK)
@@ -129,18 +128,6 @@ func main() {
 }
 
 // ─── Reconciler ──────────────────────────────────────────────────
-//
-// This function is called every time a Workflow resource is created,
-// updated, or deleted in ANY consumer workspace that has bound to
-// your APIExport.
-//
-// The mcreconcile.Request contains:
-// - req.ClusterName: which workspace the event came from
-// - req.Name: the Workflow's name
-// - req.Namespace: the Workflow's namespace
-//
-// For now, we just log everything. In production, this is where
-// you'd implement your workflow execution logic.
 
 func reconcileWorkflow(
 	ctx context.Context,
@@ -148,13 +135,13 @@ func reconcileWorkflow(
 	req mcreconcile.Request,
 ) (reconcile.Result, error) {
 	log := ctrl.Log.WithName("workflow-controller").WithValues(
-		"cluster", req.ClusterName,
+		"cluster", req.Cluster(),
 		"namespace", req.Namespace,
 		"name", req.Name,
 	)
 
 	// Get a client scoped to the specific workspace (cluster)
-	cl, err := mgr.GetCluster(ctx, req.ClusterName)
+	cl, err := mgr.GetCluster(ctx, req.Cluster())
 	if err != nil {
 		log.Error(err, "Failed to get cluster client")
 		return reconcile.Result{}, err
@@ -167,7 +154,6 @@ func reconcileWorkflow(
 	err = cl.GetClient().Get(ctx, req.NamespacedName, workflow)
 	if err != nil {
 		log.Error(err, "Failed to get Workflow")
-		// If it's deleted, just log and return
 		return reconcile.Result{}, nil
 	}
 
