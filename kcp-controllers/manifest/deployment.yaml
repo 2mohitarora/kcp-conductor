@@ -20,7 +20,8 @@ spec:
           image: registry-1:5000/workflow-controller:latest
           args:
             - --kubeconfig=/etc/kcp/kubeconfig
-            - --api-export-name=sample-workflows
+            - --api-export-name=workflow-specs
+            - --conductor-url=http://conductor-server.conductor.svc.cluster.local:8080
             - -v=2
           volumeMounts:
             - name: kubeconfig

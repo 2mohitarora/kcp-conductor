@@ -37,33 +37,21 @@ consumer workspaces using the `multicluster-provider` apiexport provider.
 ## How it works
 
 1. The controller connects to the `root:workflow-admin` workspace where
-   the `workflows` APIExport lives.
+   the `workflow-specs` APIExport lives.
 
 2. The `apiexport` provider reads the `APIExportEndpointSlice` for that
    export, which lists VW URLs — one per kcp shard.
 
 3. For each shard, it opens a WATCH on the VW endpoint. The VW only
    surfaces Workflow resources from workspaces that have an APIBinding
-   to the `workflows` export.
+   to the `workflow-specs` export.
 
-4. Any create/update/delete of a Workflow in ANY consumer workspace
-   triggers `reconcileWorkflow()` with the cluster (workspace) name
-   and the resource details.
+4. Any create/update/delete of a WorkflowDefinition or WorkflowRun in ANY consumer workspace
+   triggers `reconcileWorkflowDefinition()` or `reconcileWorkflowRun()` with the cluster (workspace) name and the resource details.
 
 5. When a new shard is added, a new VW URL appears in the endpoint
    slice — the provider automatically starts watching it. No restart
    needed.
-
-## Project structure
-
-```
-├── workflow-controller/
-│   └── main.go            # Entrypoint + reconciler
-├── manifest/
-│   └── deployment.yaml    # K8s Deployment for hosting cluster
-├── go.mod
-└── README.md
-```
 
 ## Setup
 
