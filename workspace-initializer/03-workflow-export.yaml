@@ -40,11 +40,11 @@ spec:
 apiVersion: apis.kcp.io/v1alpha2
 kind: APIExport
 metadata:
-  name: workflows
+  name: workflows # Used in APIBinding definition
 spec:
   resources:
     - group: example.com # Must match the group in APIResourceSchema
-      name: workflows # Used in APIBinding definition and must match schema's spec.names.plural
+      name: workflows # Must match schema's spec.names.plural
       schema: v1.workflows.example.com # must match schema's spec.group
       storage:
         crd: {}
