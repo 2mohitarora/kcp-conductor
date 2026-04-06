@@ -20,7 +20,7 @@ spec:
           image: registry-1:5000/workflow-controller:latest
           args:
             - --kubeconfig=/etc/kcp/kubeconfig
-            - --api-export-name=workflows
+            - --api-export-name=sample-workflows
             - -v=2
           volumeMounts:
             - name: kubeconfig
