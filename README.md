@@ -119,3 +119,5 @@ kubectl get pods --all-namespaces -w -o wide
 # Move to kcp installation
 
 # Move to kcp init-agent installation
+
+# Move to workflow controller installation
