@@ -1,0 +1,15 @@
+apiVersion: example.com/v1alpha1
+kind: Workflow
+metadata:
+  name: sample-workflow
+  namespace: default
+spec:
+  description: "Sample workflow"
+  steps:
+    - name: step1
+    - name: step2
+    - name: step3
+    - name: step4
+    - name: step5
+    - name: step6
+    - name: step7
