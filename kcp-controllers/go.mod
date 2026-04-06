@@ -1,4 +1,4 @@
-module github.com/yourorg/workflow-controller
+module kcp-controllers
 
 go 1.26
 

@@ -57,7 +57,7 @@ consumer workspaces using the `multicluster-provider` apiexport provider.
 ## Project structure
 
 ```
-├── cmd/
+├── workflow-controller/
 │   └── main.go            # Entrypoint + reconciler
 ├── manifest/
 │   └── deployment.yaml    # K8s Deployment for hosting cluster
@@ -74,7 +74,7 @@ the APIExport lives (`root:workflow-admin`). Build one:
 ```
 kubectl create secret generic workflow-controller-kubeconfig \
   -n kcp \
-  --from-file=kubeconfig=workflow-controller.kubeconfig
+  --from-file=kubeconfig=./kubeconfig/workflow-admin.kubeconfig
 ```
 
 ### 2. Build and deploy
