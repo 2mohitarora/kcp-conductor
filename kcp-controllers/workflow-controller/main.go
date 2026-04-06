@@ -7,8 +7,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,12 +34,8 @@ var workflowGVK = schema.GroupVersionKind{
 }
 
 func main() {
-	var (
-		kubeconfig    string
-		apiExportName string
-	)
 
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to kcp kubeconfig (points to the provider workspace)")
+	var apiExportName string
 	flag.StringVar(&apiExportName, "api-export-name", "workflows", "Name of the APIExport to watch")
 
 	opts := zap.Options{Development: true}
@@ -52,18 +46,8 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 	log := ctrl.Log.WithName("workflow-controller")
 
-	var cfg *rest.Config
-	var err error
-
-	if kubeconfig != "" {
-		cfg, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-	} else {
-		cfg, err = rest.InClusterConfig()
-	}
-	if err != nil {
-		log.Error(err, "Failed to build kubeconfig")
-		os.Exit(1)
-	}
+	// Use controller-runtime's built-in kubeconfig resolution
+	cfg := ctrl.GetConfigOrDie()
 
 	// ─── Create the kcp APIExport provider ───────────────────────
 	//
