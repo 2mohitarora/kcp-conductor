@@ -86,8 +86,7 @@ func main() {
 	provider, err := apiexport.New(
 		cfg,
 		apiExportName,
-		// Options can be added here, e.g.:
-		// apiexport.WithWorkspacePath("root:workflow-admin"),
+		apiexport.Options{},
 	)
 	if err != nil {
 		log.Error(err, "Failed to create apiexport provider")
