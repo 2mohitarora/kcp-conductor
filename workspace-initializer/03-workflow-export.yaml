@@ -3,7 +3,7 @@ kind: APIResourceSchema
 metadata:
   name: v1.workflows.example.com
 spec:
-  group: example.com
+  group: example.com #API group that serve resource. User write apiVersion: example.com/v1alpha1
   names:
     kind: Workflow
     listKind: WorkflowList
@@ -11,10 +11,10 @@ spec:
     singular: workflow
   scope: Namespaced
   versions:
-    - name: v1alpha1
-      served: true
-      storage: true
-      schema:
+    - name: v1alpha1 # Second part of apiVersion: example.com/v1alpha1
+      served: true # Set an old version to served: false after migrating everyone to a newer version.
+      storage: true # Only one version can be storage: true
+      schema: # OpenAPI v3 schema that validates user input.
         description: "Workflow definition"
         type: object
         properties:
