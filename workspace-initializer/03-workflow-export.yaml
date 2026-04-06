@@ -43,8 +43,8 @@ metadata:
   name: workflows # Used in APIBinding definition
 spec:
   resources:
-    - group: example.com # Must match the group in APIResourceSchema
+    - group: example.com # Must match schema's spec.group in APIResourceSchema
       name: workflows # Must match schema's spec.names.plural
-      schema: v1.workflows.example.com # must match schema's spec.group
+      schema: v1.workflows.example.com # must match schema's metadata.name
       storage:
         crd: {}
