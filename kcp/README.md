@@ -118,9 +118,6 @@ kubectl kcp --version
 
 ### Test workspace operations
 ```
-# Check current workspace
-kubectl ws . --kubeconfig=kcp-external-admin.kubeconfig
-
 # Create init-agent workspace
 kubectl create-workspace init-agent \
   --kubeconfig=kcp-external-admin.kubeconfig

@@ -18,7 +18,7 @@ kcp:
   hostAliases:
     enabled: true
     values:
-      - ip: "10.108.137.135"
+      - ip: "10.100.173.169"
         hostnames:
           - "kcp.example.com"
 kcpFrontProxy:
