@@ -6,8 +6,10 @@ spec:
   group: workflows.com #API group that serve resource. User write apiVersion: example.com/v1alpha1
   names:
     kind: SampleWorkflow
+    listKind: SampleWorkflowList
     plural: sampleworkflows
     singular: sampleworkflow
+  scope: Cluster
   versions:
     - name: v1alpha1 # Second part of apiVersion: example.com/v1alpha1
       served: true # Set an old version to served: false after migrating everyone to a newer version.

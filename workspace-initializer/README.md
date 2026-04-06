@@ -59,7 +59,7 @@ kubectl apply -f 01-workflow-workspacetype.yaml --kubeconfig=./kubeconfig/kcp-ex
 kubectl apply -f 02-workflow-ws-init-target.yaml --kubeconfig=./kubeconfig/kcp-init-agent.kubeconfig
 ```
 
-3. Add a sample workflow in worflow-admin workspace and create an API export for it
+3. Add a sample workflow definition in worflow-admin workspace and create an API export for it
 ```
 kubectl apply -f 03-workflow-export.yaml --kubeconfig=./kubeconfig/workflow-admin.kubeconfig
 ```
