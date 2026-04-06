@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────
+# Deploy to your HOSTING cluster (vind), not kcp.
+#
+# The controller needs a kubeconfig that points to the workflow-admin
+# workspace where the APIExport lives. The apiexport provider will
+# discover the VW URLs from the APIExportEndpointSlice automatically.
+#
+# Prerequisites:
+#   kubectl create secret generic workflow-controller-kubeconfig \
+#     -n kcp \
+#     --from-file=kubeconfig=<your-kcp-kubeconfig>
+# ─────────────────────────────────────────────────────────────────
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workflow-controller
+  namespace: kcp
+  labels:
+    app: workflow-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workflow-controller
+  template:
+    metadata:
+      labels:
+        app: workflow-controller
+    spec:
+      containers:
+        - name: controller
+          image: yourorg/workflow-controller:latest    # <-- Change this
+          args:
+            - --kubeconfig=/etc/kcp/kubeconfig
+            - --api-export-name=workflows
+            - -v=2
+          volumeMounts:
+            - name: kubeconfig
+              mountPath: /etc/kcp
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: kubeconfig
+          secret:
+            secretName: workflow-controller-kubeconfig
