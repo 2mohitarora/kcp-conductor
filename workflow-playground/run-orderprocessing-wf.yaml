@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────────
+# Example: Trigger an order fulfillment run
+# ─────────────────────────────────────────────────────────────────
+apiVersion: workflows.com/v1alpha1
+kind: WorkflowRun
+metadata:
+  name: order-12345-fulfillment
+spec:
+  workflowDefinition: order-fulfillment
+  correlationId: "order-12345"
+  priority: 10
+  input:
+    orderId: "order-12345"
+    customerId: "cust-67890"
+    items:
+      - sku: "LAPTOP-001"
+        quantity: 1
+        price: 999.99
+      - sku: "MOUSE-002"
+        quantity: 2
+        price: 29.99
+    shippingAddress:
+      street: "123 Main St"
+      city: "Austin"
+      state: "TX"
+      zip: "78701"
+      region: "us-south"
+    paymentMethod:
+      type: "credit_card"
+      token: "tok_visa_4242"

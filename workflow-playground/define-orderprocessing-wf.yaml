@@ -1,0 +1,162 @@
+# ─────────────────────────────────────────────────────────────────
+# Example: Order Fulfillment Workflow
+#
+# This is what an end user in root:team-marketplace submits.
+# The controller converts this to Conductor's JSON format and
+# registers it via the Conductor API.
+#
+# Flow:
+#   validate_order → check_inventory → [payment gateway]
+#     → SWITCH on payment result
+#       → success: reserve_inventory → FORK(ship + notify)
+#       → failure: notify_payment_failed
+# ─────────────────────────────────────────────────────────────────
+apiVersion: workflows.com/v1alpha1
+kind: WorkflowDefinition
+metadata:
+  name: order-fulfillment
+spec:
+  description: "End-to-end order fulfillment: validate, pay, ship, notify"
+  version: 1
+  timeoutSeconds: 3600
+
+  inputParameters:
+    - orderId
+    - customerId
+    - items
+    - shippingAddress
+    - paymentMethod
+
+  outputParameters:
+    trackingNumber: "${ship_order.output.trackingNumber}"
+    totalCharged: "${process_payment.output.amountCharged}"
+
+  tasks:
+    # ─── Step 1: Validate the order ────────────────────────
+    - name: validate_order
+      taskReferenceName: validate_order
+      type: HTTP
+      description: "Validate order details and item availability"
+      http:
+        uri: "https://order-service.internal/api/v1/orders/validate"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body:
+          orderId: "${workflow.input.orderId}"
+          items: "${workflow.input.items}"
+        connectionTimeout: 5000
+        readTimeout: 10000
+      retryCount: 2
+      retryLogic: EXPONENTIAL_BACKOFF
+      retryDelaySeconds: 5
+
+    # ─── Step 2: Check inventory ───────────────────────────
+    - name: check_inventory
+      taskReferenceName: check_inventory
+      type: HTTP
+      description: "Verify all items are in stock"
+      http:
+        uri: "https://inventory-service.internal/api/v1/check"
+        method: POST
+        body:
+          items: "${validate_order.output.response.body.validatedItems}"
+        readTimeout: 15000
+      inputParameters:
+        warehouseRegion: "${workflow.input.shippingAddress.region}"
+
+    # ─── Step 3: Process payment ───────────────────────────
+    - name: process_payment
+      taskReferenceName: process_payment
+      type: HTTP
+      description: "Charge the customer"
+      http:
+        uri: "https://payment-gateway.internal/api/v1/charge"
+        method: POST
+        body:
+          customerId: "${workflow.input.customerId}"
+          amount: "${check_inventory.output.response.body.totalAmount}"
+          paymentMethod: "${workflow.input.paymentMethod}"
+          idempotencyKey: "${workflow.input.orderId}"
+        readTimeout: 30000
+      retryCount: 3
+      retryLogic: FIXED
+      retryDelaySeconds: 10
+
+    # ─── Step 4: Route based on payment result ─────────────
+    - name: payment_decision
+      taskReferenceName: payment_decision
+      type: SWITCH
+      description: "Route based on payment success or failure"
+      evaluatorType: value-param
+      expression: "paymentStatus"
+      inputParameters:
+        paymentStatus: "${process_payment.output.response.body.status}"
+      decisionCases:
+        SUCCESS:
+          # ─── Step 5a: Reserve inventory ──────────────────
+          - name: reserve_inventory
+            taskReferenceName: reserve_inventory
+            type: HTTP
+            http:
+              uri: "https://inventory-service.internal/api/v1/reserve"
+              method: POST
+              body:
+                orderId: "${workflow.input.orderId}"
+                items: "${check_inventory.output.response.body.items}"
+
+          # ─── Step 5b: Fork — ship and notify in parallel ─
+          - name: parallel_ship_notify
+            taskReferenceName: parallel_ship_notify
+            type: FORK_JOIN
+            forkTasks:
+              # Branch 1: Ship the order
+              - - name: ship_order
+                  taskReferenceName: ship_order
+                  type: HTTP
+                  http:
+                    uri: "https://shipping-service.internal/api/v1/ship"
+                    method: POST
+                    body:
+                      orderId: "${workflow.input.orderId}"
+                      address: "${workflow.input.shippingAddress}"
+                      items: "${reserve_inventory.output.response.body.reservedItems}"
+                  retryCount: 2
+                  retryDelaySeconds: 30
+
+              # Branch 2: Send confirmation email
+              - - name: notify_customer_success
+                  taskReferenceName: notify_customer_success
+                  type: HTTP
+                  http:
+                    uri: "https://notification-service.internal/api/v1/send"
+                    method: POST
+                    body:
+                      customerId: "${workflow.input.customerId}"
+                      template: "order_confirmed"
+                      data:
+                        orderId: "${workflow.input.orderId}"
+                        amount: "${process_payment.output.response.body.amountCharged}"
+
+          # ─── Step 5c: Join parallel branches ─────────────
+          - name: join_ship_notify
+            taskReferenceName: join_ship_notify
+            type: JOIN
+            joinOn:
+              - ship_order
+              - notify_customer_success
+
+      defaultCase:
+        # ─── Payment failed path ───────────────────────────
+        - name: notify_payment_failed
+          taskReferenceName: notify_payment_failed
+          type: HTTP
+          http:
+            uri: "https://notification-service.internal/api/v1/send"
+            method: POST
+            body:
+              customerId: "${workflow.input.customerId}"
+              template: "payment_failed"
+              data:
+                orderId: "${workflow.input.orderId}"
+                reason: "${process_payment.output.response.body.failureReason}"
