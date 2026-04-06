@@ -1,50 +1,440 @@
 apiVersion: apis.kcp.io/v1alpha1
 kind: APIResourceSchema
 metadata:
-  name: v1.sampleworkflows.workflows.com
+  name: v1.workflowdefinitions.workflows.com
 spec:
   group: workflows.com #API group that serve resource. User write apiVersion: example.com/v1alpha1
   names:
-    kind: SampleWorkflow
-    listKind: SampleWorkflowList
-    plural: sampleworkflows
-    singular: sampleworkflow
+    kind: WorkflowDefinition
+    listKind: WorkflowDefinitionList
+    plural: workflowdefinitions
+    singular: workflowdefinition
+    shortNames:
+      - wfdef
   scope: Cluster
   versions:
     - name: v1alpha1 # Second part of apiVersion: example.com/v1alpha1
       served: true # Set an old version to served: false after migrating everyone to a newer version.
       storage: true # Only one version can be storage: true
       schema: # OpenAPI v3 schema that validates user input.
-        description: "Workflow definition"
+        description: "WorkflowDefinition defines a Conductor workflow template. All Conductor fields are supported via passthrough."
         type: object
         properties:
           spec:
             type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+              - tasks
             properties:
+              # ─── Common workflow-level fields (validated) ────────
               description:
                 type: string
-              steps:
+              version:
+                type: integer
+                default: 1
+                minimum: 1
+              timeoutSeconds:
+                type: integer
+                default: 0
+              timeoutPolicy:
+                type: string
+                description: "TIME_OUT_WF or ALERT_ONLY"
+              failureWorkflow:
+                type: string
+              restartable:
+                type: boolean
+                default: true
+              ownerEmail:
+                type: string
+              inputParameters:
+                type: array
+                items:
+                  type: string
+              outputParameters:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              variables:
+                type: object
+                description: "Workflow-level variables"
+                x-kubernetes-preserve-unknown-fields: true
+              inputTemplate:
+                type: object
+                description: "Default input template"
+                x-kubernetes-preserve-unknown-fields: true
+
+              # ─── Tasks array ────────────────────────────────────
+              # Each task accepts ALL Conductor fields via passthrough.
+              # Common fields are defined for convenience/validation.
+              tasks:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  required:
+                    - name
+                    - taskReferenceName
+                    - type
+                  properties:
+                    # ── Required fields ────────────────────────
+                    name:
+                      type: string
+                    taskReferenceName:
+                      type: string
+                    type:
+                      type: string
+                      # No enum — allows ANY Conductor task type
+                      # including future types added to Conductor
+
+                    # ── Common optional fields ────────────────
+                    description:
+                      type: string
+                    optional:
+                      type: boolean
+                      default: false
+                    asyncComplete:
+                      type: boolean
+                      default: false
+                    startDelay:
+                      type: integer
+                      default: 0
+                    retryCount:
+                      type: integer
+                      default: 0
+                    retryLogic:
+                      type: string
+                    retryDelaySeconds:
+                      type: integer
+                      default: 60
+                    timeoutSeconds:
+                      type: integer
+                      default: 0
+                    timeoutPolicy:
+                      type: string
+                    rateLimited:
+                      type: boolean
+                    inputParameters:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+
+                    # ── HTTP task (convenience wrapper) ────────
+                    # Users write http.uri instead of
+                    # inputParameters.http_request.uri
+                    # The controller transforms this to Conductor format.
+                    http:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                      properties:
+                        uri:
+                          type: string
+                        method:
+                          type: string
+                        headers:
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                        body:
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                        connectionTimeout:
+                          type: integer
+                        readTimeout:
+                          type: integer
+                        acceptCharset:
+                          type: string
+                        contentType:
+                          type: string
+
+                    # ── FORK_JOIN ──────────────────────────────
+                    forkTasks:
+                      type: array
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+
+                    # ── JOIN ───────────────────────────────────
+                    joinOn:
+                      type: array
+                      items:
+                        type: string
+
+                    # ── SWITCH/DECISION ────────────────────────
+                    evaluatorType:
+                      type: string
+                    expression:
+                      type: string
+                    decisionCases:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    defaultCase:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+
+                    # ── SUB_WORKFLOW ───────────────────────────
+                    subWorkflowParam:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                      properties:
+                        name:
+                          type: string
+                        version:
+                          type: integer
+
+                    # ── DO_WHILE ──────────────────────────────
+                    loopCondition:
+                      type: string
+                    loopOver:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+
+                    # ── DYNAMIC_FORK ──────────────────────────
+                    dynamicForkTasksParam:
+                      type: string
+                    dynamicForkTasksInputParamName:
+                      type: string
+
+                    # ── WAIT ──────────────────────────────────
+                    # Convenience wrapper (transformed by controller)
+                    wait:
+                      type: object
+                      properties:
+                        duration:
+                          type: string
+                        until:
+                          type: string
+
+                    # ── INLINE ─────────────────────────────────
+                    # For inline script execution
+                    evaluatorType_:
+                      type: string
+                      description: "Use evaluatorType field — this is a placeholder note"
+
+                    # ── Cache config ──────────────────────────
+                    cacheConfig:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+
+                    # ── Event/terminate ────────────────────────
+                    sink:
+                      type: string
+                    terminationStatus:
+                      type: string
+                    terminationReason:
+                      type: string
+
+                    # Everything else passes through via
+                    # x-kubernetes-preserve-unknown-fields: true
+
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+                enum: [Pending, Registered, Failed]
+              conductorName:
+                type: string
+              conductorVersion:
+                type: integer
+              lastRegisteredAt:
+                type: string
+                format: date-time
+              message:
+                type: string
+              conditions:
                 type: array
                 items:
                   type: object
                   properties:
-                    name:
+                    type:
                       type: string
-                  required:
-                    - name
-            required:
-              - steps
+                    status:
+                      type: string
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+                    reason:
+                      type: string
+                    message:
+                      type: string
       subresources:
         status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Conductor Name
+          type: string
+          jsonPath: .status.conductorName
+        - name: Version
+          type: integer
+          jsonPath: .spec.version
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+---
+apiVersion: apis.kcp.io/v1alpha1
+kind: APIResourceSchema
+metadata:
+  name: v1.workflowruns.workflows.com
+spec:
+  group: workflows.com #API group that serve resource. User write apiVersion: example.com/v1alpha1
+  names:
+    kind: WorkflowRun
+    listKind: WorkflowRunList
+    plural: workflowruns
+    singular: workflowrun
+    shortNames:
+      - wfrun
+  scope: Cluster
+  versions:
+    - name: v1alpha1 # Second part of apiVersion: example.com/v1alpha1
+      served: true # Set an old version to served: false after migrating everyone to a newer version.
+      storage: true # Only one version can be storage: true
+      schema: # OpenAPI v3 schema that validates user input.
+        description: "WorkflowRun triggers and tracks a Conductor workflow execution"
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+              - workflowDefinition
+            properties:
+              workflowDefinition:
+                type: string
+                description: "Name of the WorkflowDefinition to run (same namespace)"
+              version:
+                type: integer
+                description: "Specific version to run. Omit for latest."
+              input:
+                type: object
+                description: "Input parameters for the execution"
+                x-kubernetes-preserve-unknown-fields: true
+              correlationId:
+                type: string
+              priority:
+                type: integer
+                minimum: 0
+                maximum: 99
+                default: 0
+              idempotencyKey:
+                type: string
+              idempotencyStrategy:
+                type: string
+                enum: [FAIL, RETURN_EXISTING]
+                default: FAIL
+              taskToDomain:
+                type: object
+                description: "Task to domain mapping for task routing"
+                x-kubernetes-preserve-unknown-fields: true
+              externalInputPayloadStoragePath:
+                type: string
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+                enum:
+                  [
+                    Pending,
+                    Running,
+                    Completed,
+                    Failed,
+                    TimedOut,
+                    Terminated,
+                    Paused,
+                  ]
+              conductorWorkflowId:
+                type: string
+              conductorWorkflowName:
+                type: string
+              startTime:
+                type: string
+                format: date-time
+              endTime:
+                type: string
+                format: date-time
+              output:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              reasonForIncompletion:
+                type: string
+              currentTask:
+                type: string
+              taskStatuses:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    taskReferenceName:
+                      type: string
+                    taskType:
+                      type: string
+                    status:
+                      type: string
+                    startTime:
+                      type: string
+                      format: date-time
+                    endTime:
+                      type: string
+                      format: date-time
+                    retryCount:
+                      type: integer
+              message:
+                type: string
+              conditions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+                    reason:
+                      type: string
+                    message:
+                      type: string
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Definition
+          type: string
+          jsonPath: .spec.workflowDefinition
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Conductor ID
+          type: string
+          jsonPath: .status.conductorWorkflowId
+        - name: Current Task
+          type: string
+          jsonPath: .status.currentTask
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
 ---
 apiVersion: apis.kcp.io/v1alpha2
 kind: APIExport
 metadata:
-  name: sample-workflows # Used in APIBinding definition
+  name: workflow-specs # Used in APIBinding definition
 spec:
   resources:
     - group: workflows.com # Must match schema's spec.group in APIResourceSchema
-      name: sampleworkflows # Must match schema's spec.names.plural
-      schema: v1.sampleworkflows.workflows.com # must match schema's metadata.name
+      name: workflowdefinitions # Must match schema's spec.names.plural
+      schema: v1.workflowdefinitions.workflows.com # must match schema's metadata.name
+      storage:
+        crd: {}
+    - group: workflows.com # Must match schema's spec.group in APIResourceSchema
+      name: workflowruns # Must match schema's spec.names.plural
+      schema: v1.workflowruns.workflows.com # must match schema's metadata.name
       storage:
         crd: {}

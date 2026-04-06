@@ -59,12 +59,12 @@ kubectl apply -f 01-workflow-workspacetype.yaml --kubeconfig=./kubeconfig/kcp-ex
 kubectl apply -f 02-workflow-ws-init-target.yaml --kubeconfig=./kubeconfig/kcp-init-agent.kubeconfig
 ```
 
-3. Add a sample workflow definition in worflow-admin workspace and create an API export for it
+3. Create workflowdefinition and workflowrun specs in worflow-admin workspace and create an API export for it
 ```
 kubectl apply -f 03-workflow-export.yaml --kubeconfig=./kubeconfig/workflow-admin.kubeconfig
 ```
 
-4. Create a sample workspace with the workflow type
+4. Create a workspace with the workflow type
 ```
 kubectl create-workspace workflow-user --type=workflow \
   --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig
@@ -79,13 +79,8 @@ kubectl get apibindings --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig 
 
 6. Try something really cool 
 ```
-kubectl get sampleworkflows --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
+kubectl get wfdef --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
 
-```
+kubectl get wfrun --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
 
-7. Submit a workflow
-```
-kubectl apply -f 04-sample-workflow.yaml --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
-
-kubectl get sampleworkflow sample-workflow -o yaml --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
 ```
