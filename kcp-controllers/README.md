@@ -59,9 +59,8 @@ consumer workspaces using the `multicluster-provider` apiexport provider.
 ```
 ├── cmd/
 │   └── main.go            # Entrypoint + reconciler
-├── deploy/
+├── manifest/
 │   └── deployment.yaml    # K8s Deployment for hosting cluster
-├── Dockerfile
 ├── go.mod
 └── README.md
 ```
@@ -95,31 +94,16 @@ kubectl create secret generic workflow-controller-kubeconfig \
 ### 3. Build and deploy
 
 ```bash
-docker build -t yourorg/workflow-controller:latest .
-docker push yourorg/workflow-controller:latest
+export KO_DOCKER_REPO=localhost:5050
+export DOCKER_HOST="unix:///Users/mua0008/.orbstack/run/docker.sock"
+ko build -B ./workflow-controller --platform=linux/arm64
 
-kubectl apply -f deploy/deployment.yaml
+kubectl apply -f manifest/deployment.yaml
 ```
 
 ### 4. Test
 
 Create a Workflow in any consumer workspace:
-
-```bash
-KUBECONFIG=workflow-user.kubeconfig kubectl apply -f - <<EOF
-apiVersion: example.com/v1alpha1
-kind: Workflow
-metadata:
-  name: test-pipeline
-  namespace: default
-spec:
-  description: "Test workflow"
-  steps:
-    - name: build
-    - name: test
-    - name: deploy
-EOF
-```
 
 Watch the controller logs:
 
@@ -130,9 +114,9 @@ kubectl logs -n kcp -l app=workflow-controller -f
 You should see:
 ```
 INFO  Reconciling Workflow  cluster=<workspace-hash>  namespace=default  name=test-pipeline  description="Test workflow"  stepCount=3
-INFO    Step  index=0  name=build
-INFO    Step  index=1  name=test
-INFO    Step  index=2  name=deploy
+INFO    Step  index=0  name=...
+INFO    Step  index=1  name=...
+INFO    Step  index=2  name=...
 ```
 
 ## Key concepts

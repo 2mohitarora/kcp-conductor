@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workflow-controller
+  namespace: kcp
+  labels:
+    app: workflow-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workflow-controller
+  template:
+    metadata:
+      labels:
+        app: workflow-controller
+    spec:
+      containers:
+        - name: controller
+          image: registry-1:5000/workflow-controller:latest
+          args:
+            - --kubeconfig=/etc/kcp/kubeconfig
+            - --api-export-name=workflows
+            - -v=2
+          volumeMounts:
+            - name: kubeconfig
+              mountPath: /etc/kcp
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: kubeconfig
+          secret:
+            secretName: workflow-controller-kubeconfig
