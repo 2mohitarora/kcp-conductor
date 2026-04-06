@@ -1,9 +1,9 @@
-# Install Tools
+## Install Tools
 ```
 brew install kubectl helm docker go ko vcluster cilium-cli krew
 ```
 
-# Install Orbstack
+## Install Orbstack
 ```
 brew install --cask orbstack
 
@@ -16,14 +16,14 @@ brew install --cask orbstack
 # Start Orbstack
 ```
 
-# Configure docker
+## Configure docker
 ```
 docker context use orbstack
 export DOCKER_HOST="unix:///Users/mua0008/.orbstack/run/docker.sock"
 docker context list
 ```
 
-# Create your first vcluster
+## Create your first vcluster
 ```
 sudo vcluster create cluster-1 --driver docker --values cluster-1.yaml
 
@@ -45,7 +45,7 @@ cilium status --namespace cilium
 kubectl get configmap cilium-config -n cilium -o yaml | grep -i cidr
 ```
 
-# Check Gateway Class and Create Cilium Gateway
+## Check Gateway Class and Create Cilium Gateway
 ```
 kubectl get gatewayclasses -o wide
 
@@ -59,7 +59,7 @@ kubectl get svc -l io.cilium.gateway/owning-gateway=default-gateway -n cilium
 # See the Cilium Envoy proxy pod
 kubectl -n kube-system logs -l app.kubernetes.io/name=cilium-envoy -f -n cilium
 ```
-# Configure Registry for first cluster
+## Configure Registry for first cluster
 ```
 # Start a local registry on the same Docker network as your vind cluster
 docker run -d --name registry-1 --network vind-cluster-1 -p 5050:5000 registry:2
@@ -69,7 +69,7 @@ chmod +x ./cluster-1-script.sh
 ./cluster-1-script.sh
 ```
 
-# Configure conductor 
+## Configure conductor 
 ```
 # Create namespace
 kubectl apply -f ./conductor/00-namespace.yaml
@@ -102,7 +102,7 @@ kubectl get svc cilium-gateway-default-gateway -n cilium
 # Hit the URL in browser: http://<GATEWAY-EXTERNAL-IP>
 
 ```
-# Install cert-manager, various components need it
+## Install cert-manager, various components need it
 ```
 # Install cert-manager
 helm install cert-manager jetstack/cert-manager \
