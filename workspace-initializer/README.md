@@ -79,15 +79,13 @@ kubectl get apibindings --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig 
 
 6. Try something really cool 
 ```
-kubectl get workflows --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
+kubectl get sampleworkflows --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
 
 ```
 
 7. Submit a workflow
 ```
-kubectl create ns default --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
-
 kubectl apply -f 04-sample-workflow.yaml --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
 
-kubectl get workflow sample-workflow -o yaml --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
+kubectl get sampleworkflow sample-workflow -o yaml --kubeconfig=./kubeconfig/kcp-external-admin.kubeconfig --server=https://kcp.example.com:443/clusters/root:workflow-user
 ```

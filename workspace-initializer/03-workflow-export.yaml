@@ -1,15 +1,13 @@
 apiVersion: apis.kcp.io/v1alpha1
 kind: APIResourceSchema
 metadata:
-  name: v1.workflows.example.com
+  name: v1.sampleworkflows.workflows.com
 spec:
-  group: example.com #API group that serve resource. User write apiVersion: example.com/v1alpha1
+  group: workflows.com #API group that serve resource. User write apiVersion: example.com/v1alpha1
   names:
-    kind: Workflow
-    listKind: WorkflowList
-    plural: workflows
-    singular: workflow
-  scope: Namespaced
+    kind: SampleWorkflow
+    plural: sampleworkflows
+    singular: sampleworkflow
   versions:
     - name: v1alpha1 # Second part of apiVersion: example.com/v1alpha1
       served: true # Set an old version to served: false after migrating everyone to a newer version.
@@ -40,11 +38,11 @@ spec:
 apiVersion: apis.kcp.io/v1alpha2
 kind: APIExport
 metadata:
-  name: workflows # Used in APIBinding definition
+  name: sample-workflows # Used in APIBinding definition
 spec:
   resources:
-    - group: example.com # Must match schema's spec.group in APIResourceSchema
-      name: workflows # Must match schema's spec.names.plural
-      schema: v1.workflows.example.com # must match schema's metadata.name
+    - group: workflows.com # Must match schema's spec.group in APIResourceSchema
+      name: sampleworkflows # Must match schema's spec.names.plural
+      schema: v1.sampleworkflows.workflows.com # must match schema's metadata.name
       storage:
         crd: {}

@@ -7,12 +7,12 @@ spec:
     apiVersion: apis.kcp.io/v1alpha1
     kind: APIBinding
     metadata:
-      name: bind-workflows
+      name: bind-sample-workflows
     spec:
       reference:
         export:
           path: "root:workflow-admin"
-          name: "workflows"
+          name: "sample-workflows"
 ---
 apiVersion: initialization.kcp.io/v1alpha1
 kind: InitTarget

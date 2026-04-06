@@ -1,8 +1,7 @@
-apiVersion: example.com/v1alpha1
-kind: Workflow
+apiVersion: workflows.com/v1alpha1
+kind: SampleWorkflow
 metadata:
   name: sample-workflow
-  namespace: default
 spec:
   description: "Sample workflow"
   steps:
