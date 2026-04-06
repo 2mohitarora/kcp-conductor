@@ -45,9 +45,9 @@ func init() {
 // resource, we use unstructured.Unstructured with the GVK set.
 
 var workflowGVK = schema.GroupVersionKind{
-	Group:   "example.com",
+	Group:   "workflows.com",
 	Version: "v1alpha1",
-	Kind:    "Workflow",
+	Kind:    "SampleWorkflow",
 }
 
 func main() {
