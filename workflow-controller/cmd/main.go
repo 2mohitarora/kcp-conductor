@@ -27,7 +27,7 @@ import (
 // ─── Workflow GVK ────────────────────────────────────────────────
 // Since we don't have generated Go types for our custom Workflow
 // resource, we use unstructured.Unstructured with the GVK set.
-// This is the simplest approach for a logging-only controller.
+// This is the simplest approach for a logging-only controller to prove the concept.
 
 var workflowGVK = schema.GroupVersionKind{
 	Group:   "example.com",
@@ -42,7 +42,6 @@ var workflowGVR = schema.GroupVersionResource{
 }
 
 func main() {
-	// ─── Flags ───────────────────────────────────────────────────
 	var (
 		kubeconfig    string
 		apiExportName string
@@ -59,7 +58,6 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 	log := ctrl.Log.WithName("workflow-controller")
 
-	// ─── Build REST config ───────────────────────────────────────
 	var cfg *rest.Config
 	var err error
 
