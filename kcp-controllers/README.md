@@ -71,27 +71,13 @@ consumer workspaces using the `multicluster-provider` apiexport provider.
 
 The controller needs a kubeconfig that points to the workspace where
 the APIExport lives (`root:workflow-admin`). Build one:
-
-```bash
-# Navigate to the workflow-admin workspace
-KUBECONFIG=kcp-admin.kubeconfig kubectl ws root:workflow-admin
-
-# The kubeconfig now points to root:workflow-admin
-# Copy it for the controller
-cp kcp-admin.kubeconfig workflow-controller.kubeconfig
 ```
-
-Or build a self-contained kubeconfig like we did for the init-agent.
-
-### 2. Create the kubeconfig Secret
-
-```bash
 kubectl create secret generic workflow-controller-kubeconfig \
   -n kcp \
   --from-file=kubeconfig=workflow-controller.kubeconfig
 ```
 
-### 3. Build and deploy
+### 2. Build and deploy
 
 ```bash
 export KO_DOCKER_REPO=localhost:5050
@@ -101,7 +87,7 @@ ko build -B ./workflow-controller --platform=linux/arm64
 kubectl apply -f manifest/deployment.yaml
 ```
 
-### 4. Test
+### 3. Test
 
 Create a Workflow in any consumer workspace:
 
