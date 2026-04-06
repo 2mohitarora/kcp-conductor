@@ -35,12 +35,6 @@ var workflowGVK = schema.GroupVersionKind{
 	Kind:    "Workflow",
 }
 
-var workflowGVR = schema.GroupVersionResource{
-	Group:    "example.com",
-	Version:  "v1alpha1",
-	Resource: "workflows",
-}
-
 func main() {
 	var (
 		kubeconfig    string
@@ -223,12 +217,12 @@ func reconcileWorkflow(
 		)
 	}
 
-	// ─── Your business logic goes here ───────────────────────────
+	// ─── Final logic goes here ───────────────────────────
 	//
 	// Examples of what you'd do in production:
 	//
 	// 1. Validate the workflow steps
-	// 2. Create execution pods on a workload cluster
+	// 2. Call conductor API to create conductor workflow
 	// 3. Update the Workflow status:
 	//
 	//    workflow.Object["status"] = map[string]interface{}{
