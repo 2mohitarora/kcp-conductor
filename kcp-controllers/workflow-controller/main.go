@@ -75,6 +75,9 @@ func main() {
 	// 4. Surfaces Workflow resources from ALL consumer workspaces
 	//    across all shards through a single reconcile loop
 
+	gvks, _, _ := scheme.ObjectKinds(&apisv1alpha1.APIExportEndpointSlice{})
+	log.Info("Scheme check", "APIExportEndpointSlice GVKs", gvks)
+
 	provider, err := apiexport.New(
 		cfg,
 		apiExportName,
