@@ -17,7 +17,7 @@ helm upgrade --install init-agent-host kcp/init-agent \
   --timeout 5m 
 ```
 
-#### Switch to root:init-agent workspace and setup the workspace
+### Switch to root:init-agent workspace and setup the workspace
 ```
 ## init-agent workspace is where your InitTarget and InitTemplate objects live. This Helm install creates the CRDs and RBAC granting the agent permission to read InitTargets and InitTemplates in this workspace. Please note this is now happening within kcp
 
@@ -32,7 +32,7 @@ helm upgrade --install init-agent-crds kcp/init-agent \
 kubectl get crds --kubeconfig=./kubeconfig/kcp-init-agent.kubeconfig
 ```
 
-# Switch to root workspace and install RBAC
+### Switch to root workspace and install RBAC
 ```
 # Install 3 — RBAC into root
 helm upgrade --install init-agent-rbac kcp/init-agent \
