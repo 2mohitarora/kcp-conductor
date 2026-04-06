@@ -114,10 +114,10 @@ helm install cert-manager jetstack/cert-manager \
 kubectl get pods --all-namespaces -w -o wide
 ```
 
-# Move to kcp etcd installation
+## Move to kcp etcd installation
 
-# Move to kcp installation
+## Move to kcp installation
 
-# Move to kcp init-agent installation
+## Move to kcp init-agent installation
 
-# Move to workflow controller installation
+## Move to workflow controller installation
