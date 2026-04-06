@@ -12,8 +12,10 @@ kubectl -n etcd wait --for=condition=Ready certificate/etcd-ca --timeout=120s
 kubectl apply -f 02-certificates.yaml
 
 ### 4. Wait for all certs
+```
 kubectl -n etcd get certificates -w
-# (wait until all 3 show READY=True)
+(wait until all 3 show READY=True)
+```
 
 ### 5. Deploy etcd
 kubectl apply -f 03-etcd.yaml
