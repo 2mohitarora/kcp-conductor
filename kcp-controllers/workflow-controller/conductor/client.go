@@ -31,7 +31,8 @@ func NewClient(baseURL string) *Client {
 // RegisterWorkflow registers or updates a workflow definition.
 // Takes raw map — no typed struct, so nothing gets lost in serialization.
 func (c *Client) RegisterWorkflow(ctx context.Context, def map[string]interface{}) error {
-	body, err := json.Marshal(def)
+	// Conductor expects an array of workflow definitions
+	body, err := json.Marshal([]map[string]interface{}{def})
 	if err != nil {
 		return fmt.Errorf("marshaling workflow definition: %w", err)
 	}
