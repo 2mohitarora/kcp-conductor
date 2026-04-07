@@ -61,18 +61,7 @@ helm upgrade kcp kcp/kcp \
   --timeout 5m
 
 ```
-### Verify
 
-```
-# Check pods
-kubectl get pods -n kcp
-
-# You should see:
-# kcp-<hash>              1/1  Running
-# kcp-front-proxy-<hash>  1/1  Running
-
-# Check logs for errors
-```
 ### Add kcp front end proxy route
 ```
 # Change hostname in 04-kcp-route.yaml

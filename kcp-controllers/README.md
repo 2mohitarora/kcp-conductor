@@ -77,20 +77,10 @@ kubectl apply -f manifest/deployment.yaml
 
 ### 3. Test
 
-Create a Workflow in any consumer workspace:
-
-Watch the controller logs:
+Create a Workflow in any consumer workspace and Watch the controller logs:
 
 ```bash
 kubectl logs -n kcp -l app=workflow-controller -f
-```
-
-You should see:
-```
-INFO  Reconciling Workflow  cluster=<workspace-hash>  namespace=default  name=test-pipeline  description="Test workflow"  stepCount=3
-INFO    Step  index=0  name=...
-INFO    Step  index=1  name=...
-INFO    Step  index=2  name=...
 ```
 
 ## Key concepts
