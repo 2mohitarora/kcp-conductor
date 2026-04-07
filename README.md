@@ -1,6 +1,6 @@
 ## Install Tools
 ```
-brew install kubectl helm docker go ko vcluster cilium-cli krew
+brew install kubectl helm docker go ko vcluster cilium-cli krew k9s
 ```
 
 ## Install Orbstack
