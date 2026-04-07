@@ -101,7 +101,10 @@ kubectl krew install kcp-dev/kcp
 kubectl krew install kcp-dev/ws
 kubectl krew install kcp-dev/create-workspace
 
-# Verify
+# Add kcp to path in ~/.zshrc
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# Restart your shell and verify
 kubectl kcp --version
 ```
 
