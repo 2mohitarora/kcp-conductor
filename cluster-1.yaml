@@ -5,8 +5,6 @@ experimental:
       - name: worker-1
     loadBalancer:
       enabled: true
-    registryProxy:
-      enabled: false
 # CNI Configuration
 # vCluster only supports Flannel natively. To use other CNI plugins (Calico, Cilium, etc.):
 # 1. Disable Flannel (set enabled: false)

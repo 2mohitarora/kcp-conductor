@@ -6,13 +6,6 @@ brew install kubectl helm docker go ko vcluster cilium-cli krew k9s
 ## Install Orbstack
 ```
 brew install --cask orbstack
-
-# Add local registries that will be created later
-# Add registry to docker daemon in ~/.docker/daemon.json
-{
-  "insecure-registries": ["localhost:5050"]
-}
-
 # Start Orbstack
 ```
 
@@ -59,15 +52,6 @@ kubectl get svc -l io.cilium.gateway/owning-gateway=default-gateway -n cilium
 # See the Cilium Envoy proxy pod
 kubectl -n kube-system logs -l app.kubernetes.io/name=cilium-envoy -f -n cilium
 ```
-## Configure Registry for first cluster
-```
-# Start a local registry on the same Docker network as your vind cluster
-docker run -d --name registry-1 --network vind-cluster-1 -p 5050:5000 registry:2
-
-# Configure registry for cluster-1 so that nodes can pull from insecure registry
-chmod +x ./cluster-1-script.sh
-./cluster-1-script.sh
-```
 
 ## Configure conductor 
 ```
@@ -102,6 +86,7 @@ kubectl get svc cilium-gateway-default-gateway -n cilium
 # Hit the URL in browser: http://<GATEWAY-EXTERNAL-IP>
 
 ```
+
 ## Install cert-manager, various components need it
 ```
 # Install cert-manager
