@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: controller
-          image: registry-1:5000/workflow-controller:latest
+          image: ko.local/workflow-controller:latest
           args:
             - --kubeconfig=/etc/kcp/kubeconfig
             - --api-export-name=workflow-specs

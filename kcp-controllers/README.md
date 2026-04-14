@@ -68,9 +68,7 @@ kubectl create secret generic workflow-controller-kubeconfig \
 ### 2. Build and deploy
 
 ```bash
-export KO_DOCKER_REPO=localhost:5050
-export DOCKER_HOST="unix:///Users/mua0008/.orbstack/run/docker.sock"
-ko build -B ./workflow-controller --platform=linux/arm64
+ko build -B -L ./workflow-controller --platform=linux/arm64
 
 kubectl apply -f manifest/deployment.yaml
 ```

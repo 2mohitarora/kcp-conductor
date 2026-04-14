@@ -81,12 +81,12 @@ kubectl get gateway default-gateway -n cilium
 ### Verify kcp is reachable
 ```
 # Test with curl (use -k for self-signed certs)
-curl -k --resolve kcp.example.com:443:192.168.97.254 https://kcp.example.com/readyz
+curl -k --resolve kcp.example.com:443:192.168.107.254 https://kcp.example.com/readyz
 # Expected: "ok"
 
 # Add Gateway IP to /etc/hosts
 kubectl get svc -n cilium
-echo "192.168.97.254 kcp.example.com" | sudo tee -a /etc/hosts
+echo "192.168.107.254 kcp.example.com" | sudo tee -a /etc/hosts
 
 # Test with kubectl
 kubectl get workspaces --kubeconfig=kcp-external-admin.kubeconfig
