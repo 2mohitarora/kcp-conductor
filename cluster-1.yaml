@@ -1,6 +1,6 @@
 experimental:
   docker:
-    network: "vind-cluster-1"
+    network: "vind-cluster"
     nodes:
       - name: worker-1
     loadBalancer:
