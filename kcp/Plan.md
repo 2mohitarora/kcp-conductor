@@ -28,7 +28,7 @@ Claude: Correct. WorkspaceType objects live in the root workspace (or another pa
 - I am still little consfused what APIExport and APIBinding does, can you validate in context of my steps above if my understanding is correct
 - If i need to validate worflow definitions that our end users are submitting in their workspace, admission webhooks can be used  
 
-
+```
 root (admin only)
 ├── WorkspaceType "workflow" (initializer: true)
 │
@@ -48,3 +48,4 @@ root (admin only)
 │
 └── team-platform (end user workspace)
     └── APIBinding → "all"      ← created by initializer
+```
