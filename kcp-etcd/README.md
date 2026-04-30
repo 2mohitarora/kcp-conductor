@@ -19,8 +19,10 @@ kubectl -n etcd get certificates -w
 ```
 
 ### 5. Deploy etcd
+```
 kubectl apply -f 03-etcd.yaml
 kubectl -n etcd rollout status statefulset/etcd --timeout=180s
+```
 
 ### 6. Verify etcd is healthy
 ```
